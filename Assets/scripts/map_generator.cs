@@ -40,8 +40,8 @@ public class map_generator : MonoBehaviour
         {
           
             mapGrid[currentPosition.x, currentPosition.y] = 1;
+            Grid_manager.Instance.OccupySpace(currentPosition, new Vector2Int(1, 1));
 
-         
             int direction = Random.Range(0, 3);
 
             if (direction == 0) 
@@ -93,8 +93,12 @@ public class map_generator : MonoBehaviour
 
                 if (distance < maxRadius * (0.8f + Random.value * 0.4f)) 
                 {
-                    if (mapGrid[x, y] == 0) 
-                        mapGrid[x, y] = 2; 
+                    if (mapGrid[x, y] == 0)
+                    {
+                        mapGrid[x, y] = 2;
+                        Grid_manager.Instance.OccupySpace(new Vector2Int(x, y), new Vector2Int(1, 1));
+                    }
+                        
                     
                 }
             }
