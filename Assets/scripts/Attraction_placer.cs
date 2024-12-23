@@ -21,7 +21,7 @@ public class Attraction_placer : MonoBehaviour
 
     private void Update()
     {
-        SelectAttraction(1);
+        
         UpdateGhostAttraction();
 
         if (Input.GetMouseButtonDown(0))
@@ -88,5 +88,24 @@ public class Attraction_placer : MonoBehaviour
         {
             Debug.Log("Nie mo¿na umieœciæ atrakcji tutaj!");
         }
+    }
+    public void SelectPathTile()
+    {
+        SelectAttraction(0);
+    }
+
+    public void SelectAttraction1Tile()
+    {
+        SelectAttraction(1);
+    }
+
+    public void SelectAttraction2Tile()
+    {
+        SelectAttraction(2);
+    }
+
+    public void SelectAttraction3Tile()
+    {
+        SelectAttraction(3);
     }
 }
