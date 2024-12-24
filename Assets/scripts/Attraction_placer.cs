@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using TMPro;
 
 public class Attraction_placer : MonoBehaviour
 {
@@ -10,7 +11,8 @@ public class Attraction_placer : MonoBehaviour
     private GameObject ghostAttraction;
     private SpriteRenderer ghostRenderer;
     private Vector2Int currentGridPosition;
-
+    public Player player; // Referencja do gracza
+    public GameObject floatingTextPrefab;
     private void Start()
     {
         if (attractionPrefabs.Count > 0)
@@ -25,9 +27,8 @@ public class Attraction_placer : MonoBehaviour
         UpdateGhostAttraction();
 
         if (Input.GetMouseButtonDown(0))
-        {
             TryPlaceAttraction();
-        }
+        
     }
 
     private void SelectAttraction(int index)
@@ -78,17 +79,59 @@ public class Attraction_placer : MonoBehaviour
 
         if (Grid_manager.Instance.IsSpaceAvailable(currentGridPosition, attraction.size))
         {
-            Vector3Int cellPosition = new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0);
-            Vector3 placementPosition = tilemap.GetCellCenterWorld(cellPosition);
+            if (player.balance >= attraction.cost)
+            {
+                Vector3Int cellPosition = new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0);
+                Vector3 placementPosition = tilemap.GetCellCenterWorld(cellPosition);
 
-            Instantiate(selectedAttractionPrefab, placementPosition, Quaternion.identity);
-            Grid_manager.Instance.OccupySpace(currentGridPosition, attraction.size);
+                Instantiate(selectedAttractionPrefab, placementPosition, Quaternion.identity);
+                Grid_manager.Instance.OccupySpace(currentGridPosition, attraction.size);
+
+                // Odejmij koszt z balansu gracza
+                player.balance -= attraction.cost;
+
+                // Wyœwietl koszt jako tekst
+                ShowFloatingText($"-{attraction.cost}$", placementPosition);
+            }
+            else
+            {
+                Debug.Log("Nie masz wystarczaj¹cej iloœci pieniêdzy!");
+            }
         }
         else
         {
             Debug.Log("Nie mo¿na umieœciæ atrakcji tutaj!");
         }
     }
+    private void ShowFloatingText(string text, Vector3 position)
+    {
+        if (floatingTextPrefab != null)
+        {
+            GameObject floatingText = Instantiate(floatingTextPrefab, position, Quaternion.identity);
+
+            // Ustaw rodzica na Canvas
+            floatingText.transform.SetParent(GameObject.Find("Canvas").transform, false);
+
+            // Konwersja pozycji œwiata gry na pozycjê Canvas
+            Vector2 screenPosition = Camera.main.WorldToScreenPoint(position);
+            floatingText.transform.position = screenPosition;
+
+            var textMesh = floatingText.GetComponent<TextMeshProUGUI>();
+            if (textMesh != null)
+            {
+                textMesh.text = text;
+            }
+            else
+            {
+                Debug.LogError("Prefab floatingTextPrefab nie zawiera komponentu TextMeshProUGUI!");
+            }
+        }
+        else
+        {
+            Debug.LogError("Prefab floatingTextPrefab nie jest przypisany!");
+        }
+    }
+
     public void SelectPathTile()
     {
         SelectAttraction(0);
