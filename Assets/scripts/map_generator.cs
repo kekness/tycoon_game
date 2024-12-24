@@ -157,7 +157,6 @@ public class map_generator : MonoBehaviour
 
      
         for (int x = 0; x < mapWidth; x++)
-        {
             for (int y = 0; y < mapHeight; y++)
             {
                 Vector3Int tilePosition = new Vector3Int(x, y, 0); 
@@ -169,6 +168,6 @@ public class map_generator : MonoBehaviour
                 else 
                     tilemap.SetTile(tilePosition, groundTile);
             }
-        }
+
     }
 }

@@ -37,6 +37,18 @@ public class Grid_manager : MonoBehaviour
         }
         return true;
     }
+    public void ReleaseSpace(Vector2Int position, Vector2Int size)
+{
+    for (int x = 0; x < size.x; x++)
+    {
+        for (int y = 0; y < size.y; y++)
+        {
+            Vector3Int tilePosition = new Vector3Int(position.x + x, position.y + y, 0);
+            Vector3Int cellPosition = tilemap.WorldToCell(tilemap.CellToWorld(tilePosition));
+            gridOccupancy[cellPosition.x, cellPosition.y] = false;
+        }
+    }
+}
 
     public void OccupySpace(Vector2Int position, Vector2Int size)
     {
