@@ -84,7 +84,10 @@ public class Attraction_placer : MonoBehaviour
                 Vector3Int cellPosition = new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0);
                 Vector3 placementPosition = tilemap.GetCellCenterWorld(cellPosition);
 
-                Instantiate(selectedAttractionPrefab, placementPosition, Quaternion.identity);
+                GameObject attractionObject = Instantiate(selectedAttractionPrefab, placementPosition, Quaternion.identity);
+                Attraction placedAttraction = attractionObject.GetComponent<Attraction>();
+                placedAttraction.gridPosition = currentGridPosition;
+
                 Grid_manager.Instance.OccupySpace(currentGridPosition, attraction.size);
 
                 // Odejmij koszt z balansu gracza

@@ -46,7 +46,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attractionName: 
   size: {x: 1, y: 1}
+  cost: 50
   revenue: 0
+  gridPosition: {x: 0, y: 0}
 --- !u!212 &8689575659144002444
 SpriteRenderer:
   m_ObjectHideFlags: 0
