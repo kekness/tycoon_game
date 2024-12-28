@@ -46,7 +46,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attractionName: Carousel
   size: {x: 2, y: 2}
+  cost: 100
   revenue: 0
+  gridPosition: {x: 0, y: 0}
 --- !u!212 &6531112664717557775
 SpriteRenderer:
   m_ObjectHideFlags: 0
