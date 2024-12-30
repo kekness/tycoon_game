@@ -93,7 +93,7 @@ public class Attraction_placer : MonoBehaviour
                
                 placedAttraction.coordinates = CalculateCoordinates(currentGridPosition, attraction.size);
 
-               
+                player.attractionList.Add(placedAttraction);
                 Grid_manager.Instance.OccupySpace(currentGridPosition, attraction.size);
 
               
@@ -140,7 +140,7 @@ public class Attraction_placer : MonoBehaviour
                 { 
                  
                     Grid_manager.Instance.ReleaseSpace(attraction.coordinates);
-
+                    player.attractionList.Remove(attraction);
                     Destroy(attraction.gameObject);
 
                     Debug.Log("Atrakcja usuniêta!");
@@ -148,8 +148,6 @@ public class Attraction_placer : MonoBehaviour
             }
         }
     }
-
-
 
     private void ShowFloatingText(string text, Vector3 position)
     {
@@ -180,6 +178,8 @@ public class Attraction_placer : MonoBehaviour
         }
     }
 
+    #region buttons
+
     public void SelectPathTile()
     {
         SelectAttraction(0);
@@ -204,5 +204,5 @@ public class Attraction_placer : MonoBehaviour
         deleteMode = !deleteMode;
         RemoveAttraction();
     }
-
+    #endregion
 }
