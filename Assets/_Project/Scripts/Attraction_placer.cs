@@ -13,6 +13,7 @@ public class Attraction_placer : MonoBehaviour
     private Vector2Int currentGridPosition;
     public Player player; // Referencja do gracza
     public GameObject floatingTextPrefab;
+    private bool deleteMode = false;
     private void Start()
     {
         if (attractionPrefabs.Count > 0)
@@ -23,12 +24,14 @@ public class Attraction_placer : MonoBehaviour
 
     private void Update()
     {
-        
-        UpdateGhostAttraction();
-
-        if (Input.GetMouseButtonDown(0))
-            TryPlaceAttraction();
-        
+        if (deleteMode)
+            RemoveAttraction();
+        else
+        {
+            UpdateGhostAttraction();
+            if (Input.GetMouseButtonDown(0))
+                TryPlaceAttraction();
+        }
     }
 
     private void SelectAttraction(int index)
@@ -86,14 +89,17 @@ public class Attraction_placer : MonoBehaviour
 
                 GameObject attractionObject = Instantiate(selectedAttractionPrefab, placementPosition, Quaternion.identity);
                 Attraction placedAttraction = attractionObject.GetComponent<Attraction>();
-                placedAttraction.gridPosition = currentGridPosition;
 
+               
+                placedAttraction.coordinates = CalculateCoordinates(currentGridPosition, attraction.size);
+
+               
                 Grid_manager.Instance.OccupySpace(currentGridPosition, attraction.size);
 
-                // Odejmij koszt z balansu gracza
+              
                 player.balance -= attraction.cost;
 
-                // Wyœwietl koszt jako tekst
+               
                 ShowFloatingText($"-{attraction.cost}$", placementPosition);
             }
             else
@@ -106,6 +112,45 @@ public class Attraction_placer : MonoBehaviour
             Debug.Log("Nie mo¿na umieœciæ atrakcji tutaj!");
         }
     }
+    private List<Vector2Int> CalculateCoordinates(Vector2Int startPosition, Vector2Int size)
+    {
+        List<Vector2Int> coordinates = new List<Vector2Int>();
+
+        for (int x = 0; x < size.x; x++)
+        {
+            for (int y = 0; y < size.y; y++)
+            {
+                coordinates.Add(new Vector2Int(startPosition.x + x, startPosition.y + y));
+            }
+        }
+
+        return coordinates;
+    }
+    private void RemoveAttraction()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero);
+
+            if (hit.collider != null)
+            { 
+                Attraction attraction = hit.collider.GetComponent<Attraction>();
+                if (attraction != null)
+                { 
+                 
+                    Grid_manager.Instance.ReleaseSpace(attraction.coordinates);
+
+                    Destroy(attraction.gameObject);
+
+                    Debug.Log("Atrakcja usuniêta!");
+                }
+            }
+        }
+    }
+
+
+
     private void ShowFloatingText(string text, Vector3 position)
     {
         if (floatingTextPrefab != null)
@@ -154,4 +199,10 @@ public class Attraction_placer : MonoBehaviour
     {
         SelectAttraction(3);
     }
+    public void RemoveObject()
+    {
+        deleteMode = !deleteMode;
+        RemoveAttraction();
+    }
+
 }

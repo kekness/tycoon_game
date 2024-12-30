@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8750939968939241983}
   - component: {fileID: 7354608337521162267}
   - component: {fileID: 8771668255421633740}
+  - component: {fileID: 3828184752278197487}
   m_Layer: 0
   m_Name: FerrisWheel
   m_TagString: Untagged
@@ -46,7 +47,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attractionName: Ferris wheel
   size: {x: 2, y: 1}
+  cost: 0
   revenue: 0
+  coordinates: []
 --- !u!212 &8771668255421633740
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -98,3 +101,29 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!61 &3828184752278197487
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2943304849280580756}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 1.124, y: 1.46}
+    newSize: {x: 1.124, y: 1.46}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 1.124, y: 1.46}
+  m_EdgeRadius: 0

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6224669580549759618}
   - component: {fileID: 8444818628611195911}
   - component: {fileID: 1413853893835880803}
+  - component: {fileID: 5819391950118724798}
   m_Layer: 0
   m_Name: RollerCoaster
   m_TagString: Untagged
@@ -46,7 +47,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attractionName: 
   size: {x: 2, y: 2}
+  cost: 0
   revenue: 0
+  coordinates: []
 --- !u!212 &1413853893835880803
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -98,3 +101,29 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!61 &5819391950118724798
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1860697531854089819}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 2.048, y: 1.74}
+    newSize: {x: 2.048, y: 1.74}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 2.048, y: 1.74}
+  m_EdgeRadius: 0

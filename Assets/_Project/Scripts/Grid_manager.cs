@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -37,17 +38,23 @@ public class Grid_manager : MonoBehaviour
         }
         return true;
     }
-    public void ReleaseSpace(Vector2Int position, Vector2Int size)
-{
-    for (int x = 0; x < size.x; x++)
-        for (int y = 0; y < size.y; y++)
+    public void ReleaseSpace(List<Vector2Int> coordinates)
+    {
+        foreach (Vector2Int coordinate in coordinates)
         {
-            Vector3Int tilePosition = new Vector3Int(position.x + x, position.y + y, 0);
-            Vector3Int cellPosition = tilemap.WorldToCell(tilemap.CellToWorld(tilePosition));
-            gridOccupancy[cellPosition.x, cellPosition.y] = false;
+            Vector3Int cellPosition = tilemap.WorldToCell(tilemap.CellToWorld(new Vector3Int(coordinate.x, coordinate.y, 0)));
+
+            if (cellPosition.x >= 0 && cellPosition.y >= 0 &&
+                cellPosition.x < gridWidth && cellPosition.y < gridHeight)
+            {
+                gridOccupancy[cellPosition.x, cellPosition.y] = false;
+            }
         }
-    
-}
+
+       
+    }
+
+
 
     public void OccupySpace(Vector2Int position, Vector2Int size)
     {
