@@ -74,6 +74,12 @@ public class Attraction_placer : MonoBehaviour
         {
             ghostRenderer.color = Color.red;
         }
+        // Rotate attraction on 'R' press
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            RotateAttraction();
+        }
+
     }
 
     private void TryPlaceAttraction()
@@ -88,18 +94,18 @@ public class Attraction_placer : MonoBehaviour
                 Vector3 placementPosition = tilemap.GetCellCenterWorld(cellPosition);
 
                 GameObject attractionObject = Instantiate(selectedAttractionPrefab, placementPosition, Quaternion.identity);
-                Attraction placedAttraction = attractionObject.GetComponent<Attraction>();
 
-               
+                attractionObject.transform.localScale = ghostAttraction.transform.localScale;
+                attractionObject.transform.rotation = ghostAttraction.transform.rotation;
+
+                Attraction placedAttraction = attractionObject.GetComponent<Attraction>();
                 placedAttraction.coordinates = CalculateCoordinates(currentGridPosition, attraction.size);
 
                 player.attractionList.Add(placedAttraction);
                 Grid_manager.Instance.OccupySpace(currentGridPosition, attraction.size);
 
-              
                 player.balance -= attraction.cost;
 
-               
                 ShowFloatingText($"-{attraction.cost}$", placementPosition);
             }
             else
@@ -112,6 +118,7 @@ public class Attraction_placer : MonoBehaviour
             Debug.Log("Nie mo¿na umieœciæ atrakcji tutaj!");
         }
     }
+
     private List<Vector2Int> CalculateCoordinates(Vector2Int startPosition, Vector2Int size)
     {
         List<Vector2Int> coordinates = new List<Vector2Int>();
@@ -176,6 +183,16 @@ public class Attraction_placer : MonoBehaviour
         {
             Debug.LogError("Prefab floatingTextPrefab nie jest przypisany!");
         }
+    }
+    private void RotateAttraction()
+    {
+        selectedAttractionPrefab.GetComponent<Attraction>().size =
+    new Vector2Int(selectedAttractionPrefab.GetComponent<Attraction>().size.y,
+                   selectedAttractionPrefab.GetComponent<Attraction>().size.x); // Zamiana wymiarów
+        // Odwróæ skalê w osi X
+        Vector3 scale = ghostAttraction.transform.localScale;
+        scale.x *= -1; // Odwrócenie w osi X
+        ghostAttraction.transform.localScale = scale;
     }
 
     #region buttons
