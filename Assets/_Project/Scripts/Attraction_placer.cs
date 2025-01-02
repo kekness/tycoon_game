@@ -199,6 +199,10 @@ public class Attraction_placer : MonoBehaviour
     {
         SelectAttraction(3);
     }
+    public void SelectGate()
+    {
+        SelectAttraction(4);
+    }
     public void RemoveObject()
     {
         deleteMode = !deleteMode;
