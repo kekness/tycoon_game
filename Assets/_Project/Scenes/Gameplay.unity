@@ -11841,6 +11841,8 @@ MonoBehaviour:
   - {fileID: 8881229120739913877, guid: e4a5512db6b58b843ae9f4e8c616cbb9, type: 3}
   player: {fileID: 816180854}
   floatingTextPrefab: {fileID: 1974540818434136367, guid: 98772709fbe6b214b83de4b69843991e, type: 3}
+  entrancePrefab: {fileID: 7783839941189777425, guid: 078c5a14ba96cf64098bd2fb5dbb939b, type: 3}
+  exitPrefab: {fileID: 6515206920803430600, guid: 3b6fac19bec55d44597a2aa348aef439, type: 3}
 --- !u!1 &1041378552
 GameObject:
   m_ObjectHideFlags: 0
