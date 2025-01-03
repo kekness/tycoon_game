@@ -10,4 +10,7 @@ public class Attraction : MonoBehaviour
     public List<Vector2Int> coordinates = new List<Vector2Int>();
 
 
+    public ExitEntry entrance;
+    public ExitEntry exit;
+
 }

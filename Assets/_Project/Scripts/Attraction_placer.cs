@@ -5,15 +5,26 @@ using TMPro;
 
 public class Attraction_placer : MonoBehaviour
 {
-    public Tilemap tilemap; // Odniesienie do Tilemap
+    public Tilemap tilemap;
     public List<GameObject> attractionPrefabs;
     private GameObject selectedAttractionPrefab;
     private GameObject ghostAttraction;
     private SpriteRenderer ghostRenderer;
     private Vector2Int currentGridPosition;
-    public Player player; // Referencja do gracza
+    public Player player;
     public GameObject floatingTextPrefab;
     private bool deleteMode = false;
+    private Attraction lastPlacedAttraction;
+    private bool isPlacingEntrance = false;
+    private bool isPlacingExit = false;
+    public GameObject entrancePrefab;
+    public GameObject exitPrefab;
+
+    private GameObject ghostEntrance; // Ghost for entrance
+    private GameObject ghostExit; // Ghost for exit
+    private SpriteRenderer entranceRenderer;
+    private SpriteRenderer exitRenderer;
+
     private void Start()
     {
         if (attractionPrefabs.Count > 0)
@@ -24,15 +35,98 @@ public class Attraction_placer : MonoBehaviour
 
     private void Update()
     {
-        if (deleteMode)
-            RemoveAttraction();
-        else
+        if (isPlacingEntrance)
+        {
+            UpdateGhostEntrance();
+            if (Input.GetMouseButtonDown(0))
+            {
+                PlaceEntrance();
+            }
+        }
+        else if (isPlacingExit)
+        {
+            UpdateGhostExit();
+            if (Input.GetMouseButtonDown(0))
+            {
+                PlaceExit();
+            }
+        }
+        else if (!deleteMode)
         {
             UpdateGhostAttraction();
             if (Input.GetMouseButtonDown(0))
+            {
                 TryPlaceAttraction();
+            }
+        }
+        else
+        {
+            RemoveAttraction();
         }
     }
+
+    private void PlaceEntrance()
+    {
+        if (Grid_manager.Instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)) && IsAdjacentToAttraction(currentGridPosition))
+        {
+            Vector3 placementPosition = tilemap.GetCellCenterWorld(new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0));
+            GameObject entranceObject = Instantiate(entrancePrefab, placementPosition, Quaternion.identity);
+
+            ExitEntry entrance = entranceObject.GetComponent<ExitEntry>();
+            lastPlacedAttraction.entrance = entrance;
+            entrance.coordinates = new List<Vector2Int> { currentGridPosition };
+
+            Grid_manager.Instance.OccupySpace(currentGridPosition, new Vector2Int(1, 1));
+
+            Destroy(ghostEntrance); // Destroy ghost entrance after placement
+            isPlacingEntrance = false;
+            isPlacingExit = true;
+        }
+        else
+        {
+            Debug.Log("Nie mo¿na umieœciæ wejœcia! Musi byæ ustawione obok atrakcji.");
+        }
+    }
+
+    private void PlaceExit()
+    {
+        if (Grid_manager.Instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)) && IsAdjacentToAttraction(currentGridPosition))
+        {
+            Vector3 placementPosition = tilemap.GetCellCenterWorld(new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0));
+            GameObject exitObject = Instantiate(exitPrefab, placementPosition, Quaternion.identity);
+
+            ExitEntry exit = exitObject.GetComponent<ExitEntry>();
+            lastPlacedAttraction.exit = exit;
+            exit.coordinates = new List<Vector2Int> { currentGridPosition };
+
+            Grid_manager.Instance.OccupySpace(currentGridPosition, new Vector2Int(1, 1));
+
+            Destroy(ghostExit); // Destroy ghost exit after placement
+            isPlacingExit = false;
+        }
+        else
+        {
+            Debug.Log("Nie mo¿na umieœciæ wyjœcia! Musi byæ ustawione obok atrakcji.");
+        }
+    }
+
+    private bool IsAdjacentToAttraction(Vector2Int position)
+    {
+        // Przeszukaj wszystkie atrakcje i sprawdŸ, czy s¹siaduj¹ z danym punktem
+        foreach (var attraction in player.attractionList)
+        {
+            foreach (var coord in attraction.coordinates)
+            {
+                // SprawdŸ s¹siedztwo w czterech kierunkach
+                if (Vector2Int.Distance(coord, position) == 1) // Sprawdzamy odleg³oœæ o 1
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 
     private void SelectAttraction(int index)
     {
@@ -47,24 +141,20 @@ public class Attraction_placer : MonoBehaviour
             }
 
             ghostRenderer.sprite = selectedAttractionPrefab.GetComponent<SpriteRenderer>().sprite;
-            ghostRenderer.sortingOrder = 10; // Ustaw wy¿szy priorytet renderowania
+            ghostRenderer.sortingOrder = 10;
         }
     }
 
     private void UpdateGhostAttraction()
     {
-        // Convert mouse position to world position
         Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        worldPosition.z = 0; // Ensure it's on the same plane
+        worldPosition.z = 0;
 
-        // Convert world position to grid cell position
         Vector3Int cellPosition = tilemap.WorldToCell(worldPosition);
         currentGridPosition = new Vector2Int(cellPosition.x, cellPosition.y);
 
-        // Update ghost attraction position
         ghostAttraction.transform.position = tilemap.GetCellCenterWorld(cellPosition);
 
-        // Check if placement is valid
         Attraction attraction = selectedAttractionPrefab.GetComponent<Attraction>();
         if (Grid_manager.Instance.IsSpaceAvailable(currentGridPosition, attraction.size))
         {
@@ -74,12 +164,67 @@ public class Attraction_placer : MonoBehaviour
         {
             ghostRenderer.color = Color.red;
         }
-        // Rotate attraction on 'R' press
+
         if (Input.GetKeyDown(KeyCode.R))
         {
             RotateAttraction();
         }
+    }
 
+    private void UpdateGhostEntrance()
+    {
+        if (ghostEntrance == null)
+        {
+            ghostEntrance = new GameObject("GhostEntrance");
+            entranceRenderer = ghostEntrance.AddComponent<SpriteRenderer>();
+            entranceRenderer.sprite = entrancePrefab.GetComponent<SpriteRenderer>().sprite;
+            entranceRenderer.sortingOrder = 10;
+        }
+
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        worldPosition.z = 0;
+
+        Vector3Int cellPosition = tilemap.WorldToCell(worldPosition);
+        currentGridPosition = new Vector2Int(cellPosition.x, cellPosition.y);
+
+        ghostEntrance.transform.position = tilemap.GetCellCenterWorld(cellPosition);
+
+        if (Grid_manager.Instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)))
+        {
+            entranceRenderer.color = Color.green;
+        }
+        else
+        {
+            entranceRenderer.color = Color.red;
+        }
+    }
+
+    private void UpdateGhostExit()
+    {
+        if (ghostExit == null)
+        {
+            ghostExit = new GameObject("GhostExit");
+            exitRenderer = ghostExit.AddComponent<SpriteRenderer>();
+            exitRenderer.sprite = exitPrefab.GetComponent<SpriteRenderer>().sprite;
+            exitRenderer.sortingOrder = 10;
+        }
+
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        worldPosition.z = 0;
+
+        Vector3Int cellPosition = tilemap.WorldToCell(worldPosition);
+        currentGridPosition = new Vector2Int(cellPosition.x, cellPosition.y);
+
+        ghostExit.transform.position = tilemap.GetCellCenterWorld(cellPosition);
+
+        if (Grid_manager.Instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)))
+        {
+            exitRenderer.color = Color.green;
+        }
+        else
+        {
+            exitRenderer.color = Color.red;
+        }
     }
 
     private void TryPlaceAttraction()
@@ -94,19 +239,20 @@ public class Attraction_placer : MonoBehaviour
                 Vector3 placementPosition = tilemap.GetCellCenterWorld(cellPosition);
 
                 GameObject attractionObject = Instantiate(selectedAttractionPrefab, placementPosition, Quaternion.identity);
-
                 attractionObject.transform.localScale = ghostAttraction.transform.localScale;
                 attractionObject.transform.rotation = ghostAttraction.transform.rotation;
 
-                Attraction placedAttraction = attractionObject.GetComponent<Attraction>();
-                placedAttraction.coordinates = CalculateCoordinates(currentGridPosition, attraction.size);
+                lastPlacedAttraction = attractionObject.GetComponent<Attraction>();
+                lastPlacedAttraction.coordinates = CalculateCoordinates(currentGridPosition, attraction.size);
 
-                player.attractionList.Add(placedAttraction);
+                player.attractionList.Add(lastPlacedAttraction);
                 Grid_manager.Instance.OccupySpace(currentGridPosition, attraction.size);
 
                 player.balance -= attraction.cost;
 
                 ShowFloatingText($"-{attraction.cost}$", placementPosition);
+
+                isPlacingEntrance = true; // Prze³¹cz na tryb ustawiania wejœcia
             }
             else
             {
@@ -133,6 +279,7 @@ public class Attraction_placer : MonoBehaviour
 
         return coordinates;
     }
+
     private void RemoveAttraction()
     {
         if (Input.GetMouseButtonDown(0))
@@ -141,16 +288,30 @@ public class Attraction_placer : MonoBehaviour
             RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero);
 
             if (hit.collider != null)
-            { 
+            {
                 Attraction attraction = hit.collider.GetComponent<Attraction>();
                 if (attraction != null)
-                { 
-                 
+                {
+                    // Usuwamy wejœcie
+                    if (attraction.entrance != null)
+                    {
+                        Grid_manager.Instance.ReleaseSpace(attraction.entrance.coordinates);
+                        Destroy(attraction.entrance.gameObject);
+                    }
+
+                    // Usuwamy wyjœcie
+                    if (attraction.exit != null)
+                    {
+                        Grid_manager.Instance.ReleaseSpace(attraction.exit.coordinates);
+                        Destroy(attraction.exit.gameObject);
+                    }
+
+                    // Usuwamy atrakcjê
                     Grid_manager.Instance.ReleaseSpace(attraction.coordinates);
                     player.attractionList.Remove(attraction);
                     Destroy(attraction.gameObject);
 
-                    Debug.Log("Atrakcja usuniêta!");
+                    Debug.Log("Atrakcja i powi¹zane obiekty zosta³y usuniête!");
                 }
             }
         }
@@ -161,11 +322,8 @@ public class Attraction_placer : MonoBehaviour
         if (floatingTextPrefab != null)
         {
             GameObject floatingText = Instantiate(floatingTextPrefab, position, Quaternion.identity);
-
-            // Ustaw rodzica na Canvas
             floatingText.transform.SetParent(GameObject.Find("Canvas").transform, false);
 
-            // Konwersja pozycji œwiata gry na pozycjê Canvas
             Vector2 screenPosition = Camera.main.WorldToScreenPoint(position);
             floatingText.transform.position = screenPosition;
 
@@ -184,46 +342,25 @@ public class Attraction_placer : MonoBehaviour
             Debug.LogError("Prefab floatingTextPrefab nie jest przypisany!");
         }
     }
+
     private void RotateAttraction()
     {
         selectedAttractionPrefab.GetComponent<Attraction>().size =
-    new Vector2Int(selectedAttractionPrefab.GetComponent<Attraction>().size.y,
-                   selectedAttractionPrefab.GetComponent<Attraction>().size.x); // Zamiana wymiarów
-        // Odwróæ skalê w osi X
+            new Vector2Int(selectedAttractionPrefab.GetComponent<Attraction>().size.y,
+                           selectedAttractionPrefab.GetComponent<Attraction>().size.x);
+
         Vector3 scale = ghostAttraction.transform.localScale;
-        scale.x *= -1; // Odwrócenie w osi X
+        scale.x *= -1;
         ghostAttraction.transform.localScale = scale;
     }
 
     #region buttons
-
-    public void SelectPathTile()
-    {
-        SelectAttraction(0);
-    }
-
-    public void SelectAttraction1Tile()
-    {
-        SelectAttraction(1);
-    }
-
-    public void SelectAttraction2Tile()
-    {
-        SelectAttraction(2);
-    }
-
-    public void SelectAttraction3Tile()
-    {
-        SelectAttraction(3);
-    }
-    public void SelectGate()
-    {
-        SelectAttraction(4);
-    }
-    public void RemoveObject()
-    {
-        deleteMode = !deleteMode;
-        RemoveAttraction();
-    }
+    // Buttony dla atrakcji
+    public void SelectPathTile() { SelectAttraction(0); }
+    public void SelectAttraction1Tile() { SelectAttraction(1); }
+    public void SelectAttraction2Tile() { SelectAttraction(2); }
+    public void SelectAttraction3Tile() { SelectAttraction(3); }
+    public void SelectGate() { SelectAttraction(4); }
+    public void RemoveObject() { deleteMode = !deleteMode; }
     #endregion
 }
