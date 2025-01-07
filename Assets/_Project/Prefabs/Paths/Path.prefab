@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3595211620842640567}
-  - component: {fileID: 5157654132591160474}
   - component: {fileID: 8689575659144002444}
   - component: {fileID: -3665140343221286222}
+  - component: {fileID: -4716331285534044710}
   m_Layer: 0
   m_Name: Path
   m_TagString: Untagged
@@ -33,23 +33,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5157654132591160474
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1897067831832346604}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f5ef1409aa636f499007a49229a31c9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  attractionName: 
-  size: {x: 1, y: 1}
-  cost: 50
-  revenue: 0
-  coordinates: []
 --- !u!212 &8689575659144002444
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -127,3 +110,20 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.992, y: 1.076}
   m_EdgeRadius: 0
+--- !u!114 &-4716331285534044710
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1897067831832346604}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e867cd22c869c164ebc03b6efee68484, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buildingName: Path
+  cost: 50
+  coordinates: []
+  size: {x: 1, y: 1}
+  size: {x: 1, y: 1}

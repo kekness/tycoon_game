@@ -1,11 +1,11 @@
 using System.Collections;
 using UnityEngine;
 
-public class VisitorSpawner : MonoBehaviour
+public class Gate : Building
 {
-    public GameObject visitorPrefab; 
-    public float spawnInterval = 5f; 
-    public int maxVisitors = 10; 
+    public GameObject visitorPrefab;
+    public float spawnInterval = 5f;
+    public int maxVisitors = 10;
     private int currentVisitors = 0;
 
     void Start()

@@ -56,7 +56,7 @@ public class Attraction_placer : MonoBehaviour
             UpdateGhostAttraction();
             if (Input.GetMouseButtonDown(0))
             {
-                TryPlaceAttraction();
+                TryPlaceBuilding();
             }
         }
         else
@@ -155,8 +155,9 @@ public class Attraction_placer : MonoBehaviour
 
         ghostAttraction.transform.position = tilemap.GetCellCenterWorld(cellPosition);
 
-        Attraction attraction = selectedAttractionPrefab.GetComponent<Attraction>();
-        if (Grid_manager.Instance.IsSpaceAvailable(currentGridPosition, attraction.size))
+        Building building = selectedAttractionPrefab.GetComponent<Building>();
+
+        if (Grid_manager.Instance.IsSpaceAvailable(currentGridPosition, building.size))
         {
             ghostRenderer.color = Color.green;
         }
@@ -165,11 +166,12 @@ public class Attraction_placer : MonoBehaviour
             ghostRenderer.color = Color.red;
         }
 
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R) && building is Attraction)
         {
             RotateAttraction();
         }
     }
+
 
     private void UpdateGhostEntrance()
     {
@@ -227,32 +229,41 @@ public class Attraction_placer : MonoBehaviour
         }
     }
 
-    private void TryPlaceAttraction()
+    private void TryPlaceBuilding()
     {
-        Attraction attraction = selectedAttractionPrefab.GetComponent<Attraction>();
+        Building building = selectedAttractionPrefab.GetComponent<Building>();
 
-        if (Grid_manager.Instance.IsSpaceAvailable(currentGridPosition, attraction.size))
+        if (Grid_manager.Instance.IsSpaceAvailable(currentGridPosition, building.size))
         {
-            if (player.balance >= attraction.cost)
+            if (player.balance >= building.cost)
             {
                 Vector3Int cellPosition = new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0);
                 Vector3 placementPosition = tilemap.GetCellCenterWorld(cellPosition);
 
-                GameObject attractionObject = Instantiate(selectedAttractionPrefab, placementPosition, Quaternion.identity);
-                attractionObject.transform.localScale = ghostAttraction.transform.localScale;
-                attractionObject.transform.rotation = ghostAttraction.transform.rotation;
+                GameObject buildingObject = Instantiate(selectedAttractionPrefab, placementPosition, Quaternion.identity);
+                buildingObject.transform.localScale = ghostAttraction.transform.localScale;
+                buildingObject.transform.rotation = ghostAttraction.transform.rotation;
 
-                lastPlacedAttraction = attractionObject.GetComponent<Attraction>();
-                lastPlacedAttraction.coordinates = CalculateCoordinates(currentGridPosition, attraction.size);
+                Building placedBuilding = buildingObject.GetComponent<Building>();
+                placedBuilding.coordinates = CalculateCoordinates(currentGridPosition, building.size);
 
-                player.attractionList.Add(lastPlacedAttraction);
-                Grid_manager.Instance.OccupySpace(currentGridPosition, attraction.size);
+                Grid_manager.Instance.OccupySpace(currentGridPosition, building.size);
 
-                player.balance -= attraction.cost;
+                player.balance -= building.cost;
 
-                ShowFloatingText($"-{attraction.cost}$", placementPosition);
+                ShowFloatingText($"-{building.cost}$", placementPosition);
 
-                isPlacingEntrance = true; // Prze³¹cz na tryb ustawiania wejœcia
+                // Jeœli budynek jest atrakcj¹, dodaj go do listy atrakcji i ustaw tryb wejœcia
+                if (placedBuilding is Attraction attraction)
+                {
+                    player.attractionList.Add(attraction);
+                    lastPlacedAttraction = attraction;
+                    isPlacingEntrance = true;
+                }
+                else
+                {
+                    Debug.Log("Budynek nie jest atrakcj¹, nie wymaga wejœcia i wyjœcia.");
+                }
             }
             else
             {
@@ -261,9 +272,12 @@ public class Attraction_placer : MonoBehaviour
         }
         else
         {
-            Debug.Log("Nie mo¿na umieœciæ atrakcji tutaj!");
+            Debug.Log("Nie mo¿na umieœciæ budynku tutaj!");
         }
     }
+
+
+
 
     private List<Vector2Int> CalculateCoordinates(Vector2Int startPosition, Vector2Int size)
     {
@@ -289,27 +303,31 @@ public class Attraction_placer : MonoBehaviour
 
             if (hit.collider != null)
             {
-                Attraction attraction = hit.collider.GetComponent<Attraction>();
-                if (attraction != null)
+                Building building = hit.collider.GetComponent<Building>();
+                if (building != null)
                 {
-                    // Usuwamy wejœcie
-                    if (attraction.entrance != null)
+                    if (building is Attraction attraction)
                     {
-                        Grid_manager.Instance.ReleaseSpace(attraction.entrance.coordinates);
-                        Destroy(attraction.entrance.gameObject);
-                    }
+                        if (attraction.entrance != null)
+                        {
+                            Grid_manager.Instance.ReleaseSpace(attraction.entrance.coordinates);
+                            Destroy(attraction.entrance.gameObject);
+                        }
 
-                    // Usuwamy wyjœcie
-                    if (attraction.exit != null)
-                    {
-                        Grid_manager.Instance.ReleaseSpace(attraction.exit.coordinates);
-                        Destroy(attraction.exit.gameObject);
+                        // Usuwamy wyjœcie
+                        if (attraction.exit != null)
+                        {
+                            Grid_manager.Instance.ReleaseSpace(attraction.exit.coordinates);
+                            Destroy(attraction.exit.gameObject);
+                        }
+                           player.attractionList.Remove(attraction);
                     }
+                      
 
                     // Usuwamy atrakcjê
-                    Grid_manager.Instance.ReleaseSpace(attraction.coordinates);
-                    player.attractionList.Remove(attraction);
-                    Destroy(attraction.gameObject);
+                    Grid_manager.Instance.ReleaseSpace(building.coordinates);
+                 
+                    Destroy(building.gameObject);
 
                     Debug.Log("Atrakcja i powi¹zane obiekty zosta³y usuniête!");
                 }
