@@ -11790,7 +11790,7 @@ MonoBehaviour:
   mapHeight: 50
   riverTile: {fileID: 11400000, guid: 6963e5be83f69e74ca5cec3856207a4a, type: 2}
   groundTile: {fileID: 11400000, guid: 8527370ecea6eea46a0d3f5b40d4c08e, type: 2}
-  forestTile: {fileID: 11400000, guid: aefd58a2b2adb814a98069a81fab0260, type: 2}
+  forestPrefab: {fileID: 8556485365578565462, guid: 69663097e8e2b0e48b8bb81abcd2a9da, type: 3}
 --- !u!4 &982055820
 Transform:
   m_ObjectHideFlags: 0

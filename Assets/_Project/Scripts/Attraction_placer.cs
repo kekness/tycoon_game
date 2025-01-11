@@ -303,6 +303,7 @@ public class Attraction_placer : MonoBehaviour
 
             if (hit.collider != null)
             {
+                // Sprawdzamy, czy to Building (atrakcja)
                 Building building = hit.collider.GetComponent<Building>();
                 if (building != null)
                 {
@@ -314,26 +315,45 @@ public class Attraction_placer : MonoBehaviour
                             Destroy(attraction.entrance.gameObject);
                         }
 
-                        // Usuwamy wyjœcie
                         if (attraction.exit != null)
                         {
                             Grid_manager.Instance.ReleaseSpace(attraction.exit.coordinates);
                             Destroy(attraction.exit.gameObject);
                         }
-                           player.attractionList.Remove(attraction);
-                    }
-                      
 
-                    // Usuwamy atrakcjê
+                        player.attractionList.Remove(attraction);
+                    }
+
+                    // Zwolnij miejsce i usuñ budynek
                     Grid_manager.Instance.ReleaseSpace(building.coordinates);
-                 
                     Destroy(building.gameObject);
 
                     Debug.Log("Atrakcja i powi¹zane obiekty zosta³y usuniête!");
                 }
+                else 
+                {
+
+                    // Sprawdzamy, czy to prefab lasu
+                    Forest forest = hit.collider.GetComponent<Forest>();
+                    if (forest != null && player.balance >= forest.removalCost)
+                    {
+
+                        Grid_manager.Instance.ReleaseSpace(forest.coordinates);
+
+                        Destroy(forest.gameObject);
+
+                        Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                        Vector3 placementPosition = new Vector3(mouseWorldPosition.x, mouseWorldPosition.y, 0f);
+                  
+                        ShowFloatingText($"-{forest.removalCost}$", placementPosition);
+                        Debug.Log("Las zosta³ usuniêty!");
+                        
+                    }
+                }
             }
         }
     }
+
 
     private void ShowFloatingText(string text, Vector3 position)
     {

@@ -10,7 +10,8 @@ public class map_generator : MonoBehaviour
     public int mapHeight = 20;     
     public TileBase riverTile;    
     public TileBase groundTile;
-    public TileBase forestTile;
+    public GameObject forestPrefab;
+
 
     private int[,] mapGrid;         
     private Vector2Int riverStart;  
@@ -152,22 +153,26 @@ public class map_generator : MonoBehaviour
 
     void RenderMap()
     {
-        
         tilemap.ClearAllTiles();
-
-     
         for (int x = 0; x < mapWidth; x++)
             for (int y = 0; y < mapHeight; y++)
             {
-                Vector3Int tilePosition = new Vector3Int(x, y, 0); 
+                Vector3Int tilePosition = new Vector3Int(x, y, 0);
+                Vector3 worldPosition = tilemap.GetCellCenterWorld(tilePosition);
 
-                if (mapGrid[x, y] == 1) 
+                if (mapGrid[x, y] == 1)
                     tilemap.SetTile(tilePosition, riverTile);
-                else if(mapGrid[x,y]==2)
-                    tilemap.SetTile(tilePosition, forestTile);
-                else 
+                else if (mapGrid[x, y] == 2)
+                {
+                    tilemap.SetTile(tilePosition, groundTile);
+                    GameObject forestObject = Instantiate(forestPrefab, worldPosition, Quaternion.identity);
+                    Forest forest = forestObject.GetComponent<Forest>();
+                    forest.coordinates.Add( new Vector2Int(x, y));
+                } 
+                else
                     tilemap.SetTile(tilePosition, groundTile);
             }
-
+        
     }
+
 }
