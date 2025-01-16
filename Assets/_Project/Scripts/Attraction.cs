@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class Attraction : Building
+public class Attraction : Structure
 {
     public int ticketCost;
     public ExitEntry entrance;

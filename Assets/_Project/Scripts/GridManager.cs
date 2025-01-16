@@ -2,18 +2,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class Grid_manager : MonoBehaviour
-{
-    public static Grid_manager Instance;
+public class GridManager : BaseManager<GridManager>
+{    
     public Tilemap tilemap; // Odniesienie do Tilemap
     private bool[,] gridOccupancy;
 
     public int gridWidth = 50;
     public int gridHeight = 50;
 
-    private void Awake()
+    public void Awake()
     {
-        if (Instance == null) Instance = this;
+        base.InitializeManager();
 
         gridOccupancy = new bool[gridWidth, gridHeight];
     }
@@ -53,8 +52,6 @@ public class Grid_manager : MonoBehaviour
 
        
     }
-
-
 
     public void OccupySpace(Vector2Int position, Vector2Int size)
     {

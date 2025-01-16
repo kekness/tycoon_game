@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using TMPro;
 
-public class Attraction_placer : MonoBehaviour
+public class AttractionPlacer : MonoBehaviour
 {
     public Tilemap tilemap;
     public List<GameObject> attractionPrefabs;
@@ -67,7 +67,7 @@ public class Attraction_placer : MonoBehaviour
 
     private void PlaceEntrance()
     {
-        if (Grid_manager.Instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)) && IsAdjacentToAttraction(currentGridPosition))
+        if (GridManager.instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)) && IsAdjacentToAttraction(currentGridPosition))
         {
             Vector3 placementPosition = tilemap.GetCellCenterWorld(new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0));
             GameObject entranceObject = Instantiate(entrancePrefab, placementPosition, Quaternion.identity);
@@ -76,7 +76,7 @@ public class Attraction_placer : MonoBehaviour
             lastPlacedAttraction.entrance = entrance;
             entrance.coordinates = new List<Vector2Int> { currentGridPosition };
 
-            Grid_manager.Instance.OccupySpace(currentGridPosition, new Vector2Int(1, 1));
+            GridManager.instance.OccupySpace(currentGridPosition, new Vector2Int(1, 1));
 
             Destroy(ghostEntrance); // Destroy ghost entrance after placement
             isPlacingEntrance = false;
@@ -90,7 +90,7 @@ public class Attraction_placer : MonoBehaviour
 
     private void PlaceExit()
     {
-        if (Grid_manager.Instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)) && IsAdjacentToAttraction(currentGridPosition))
+        if (GridManager.instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)) && IsAdjacentToAttraction(currentGridPosition))
         {
             Vector3 placementPosition = tilemap.GetCellCenterWorld(new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0));
             GameObject exitObject = Instantiate(exitPrefab, placementPosition, Quaternion.identity);
@@ -99,7 +99,7 @@ public class Attraction_placer : MonoBehaviour
             lastPlacedAttraction.exit = exit;
             exit.coordinates = new List<Vector2Int> { currentGridPosition };
 
-            Grid_manager.Instance.OccupySpace(currentGridPosition, new Vector2Int(1, 1));
+            GridManager.instance.OccupySpace(currentGridPosition, new Vector2Int(1, 1));
 
             Destroy(ghostExit); // Destroy ghost exit after placement
             isPlacingExit = false;
@@ -154,10 +154,9 @@ public class Attraction_placer : MonoBehaviour
         currentGridPosition = new Vector2Int(cellPosition.x, cellPosition.y);
 
         ghostAttraction.transform.position = tilemap.GetCellCenterWorld(cellPosition);
+        Structure structure = selectedAttractionPrefab.GetComponent<Structure>();
 
-        Building building = selectedAttractionPrefab.GetComponent<Building>();
-
-        if (Grid_manager.Instance.IsSpaceAvailable(currentGridPosition, building.size))
+        if (GridManager.instance.IsSpaceAvailable(currentGridPosition, structure.size))
         {
             ghostRenderer.color = Color.green;
         }
@@ -166,7 +165,7 @@ public class Attraction_placer : MonoBehaviour
             ghostRenderer.color = Color.red;
         }
 
-        if (Input.GetKeyDown(KeyCode.R) && building is Attraction)
+        if (Input.GetKeyDown(KeyCode.R) && structure is Attraction)
         {
             RotateAttraction();
         }
@@ -191,7 +190,7 @@ public class Attraction_placer : MonoBehaviour
 
         ghostEntrance.transform.position = tilemap.GetCellCenterWorld(cellPosition);
 
-        if (Grid_manager.Instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)))
+        if (GridManager.instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)))
         {
             entranceRenderer.color = Color.green;
         }
@@ -219,7 +218,7 @@ public class Attraction_placer : MonoBehaviour
 
         ghostExit.transform.position = tilemap.GetCellCenterWorld(cellPosition);
 
-        if (Grid_manager.Instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)))
+        if (GridManager.instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)))
         {
             exitRenderer.color = Color.green;
         }
@@ -231,11 +230,11 @@ public class Attraction_placer : MonoBehaviour
 
     private void TryPlaceBuilding()
     {
-        Building building = selectedAttractionPrefab.GetComponent<Building>();
+        Structure structure = selectedAttractionPrefab.GetComponent<Structure>();
 
-        if (Grid_manager.Instance.IsSpaceAvailable(currentGridPosition, building.size))
+        if (GridManager.instance.IsSpaceAvailable(currentGridPosition, structure.size))
         {
-            if (player.balance >= building.cost)
+            if (player.balance >= structure.cost)
             {
                 Vector3Int cellPosition = new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0);
                 Vector3 placementPosition = tilemap.GetCellCenterWorld(cellPosition);
@@ -244,17 +243,17 @@ public class Attraction_placer : MonoBehaviour
                 buildingObject.transform.localScale = ghostAttraction.transform.localScale;
                 buildingObject.transform.rotation = ghostAttraction.transform.rotation;
 
-                Building placedBuilding = buildingObject.GetComponent<Building>();
-                placedBuilding.coordinates = CalculateCoordinates(currentGridPosition, building.size);
+                Structure placedStructure = buildingObject.GetComponent<Structure>();
+                placedStructure.coordinates = CalculateCoordinates(currentGridPosition, structure.size);
 
-                Grid_manager.Instance.OccupySpace(currentGridPosition, building.size);
+                GridManager.instance.OccupySpace(currentGridPosition, structure.size);
 
-                player.balance -= building.cost;
+                player.balance -= structure.cost;
 
-                ShowFloatingText($"-{building.cost}$", placementPosition);
+                ShowFloatingText($"-{structure.cost}$", placementPosition);
 
                 // Jeœli budynek jest atrakcj¹, dodaj go do listy atrakcji i ustaw tryb wejœcia
-                if (placedBuilding is Attraction attraction)
+                if (placedStructure is Attraction attraction)
                 {
                     player.attractionList.Add(attraction);
                     lastPlacedAttraction = attraction;
@@ -304,20 +303,41 @@ public class Attraction_placer : MonoBehaviour
             if (hit.collider != null)
             {
                 // Sprawdzamy, czy to Building (atrakcja)
-                Building building = hit.collider.GetComponent<Building>();
-                if (building != null)
+                Structure structure = hit.collider.GetComponent<Structure>();
+                if (structure != null)
                 {
-                    if (building is Attraction attraction)
+
+                    // Sprawdzamy, czy to prefab lasu
+                    Forest forest = hit.collider.GetComponent<Forest>();
+                    Debug.Log(forest);
+                    if (forest != null && player.balance >= forest.removalCost)
+                    {
+                        Debug.Log(forest.removalCost + " chuj");
+                        GridManager.instance.ReleaseSpace(forest.coordinates);
+
+                        Destroy(forest.gameObject);
+
+                        Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                        Vector3 placementPosition = new Vector3(mouseWorldPosition.x, mouseWorldPosition.y, 0f);
+
+                        ShowFloatingText($"-{forest.removalCost}$", placementPosition);
+                        Debug.Log("Las zosta³ usuniêty!");
+
+                    }
+                }
+                
+                
+                    if (structure is Attraction attraction)
                     {
                         if (attraction.entrance != null)
                         {
-                            Grid_manager.Instance.ReleaseSpace(attraction.entrance.coordinates);
+                            GridManager.instance.ReleaseSpace(attraction.entrance.coordinates);
                             Destroy(attraction.entrance.gameObject);
                         }
 
                         if (attraction.exit != null)
                         {
-                            Grid_manager.Instance.ReleaseSpace(attraction.exit.coordinates);
+                            GridManager.instance.ReleaseSpace(attraction.exit.coordinates);
                             Destroy(attraction.exit.gameObject);
                         }
 
@@ -325,31 +345,11 @@ public class Attraction_placer : MonoBehaviour
                     }
 
                     // Zwolnij miejsce i usuñ budynek
-                    Grid_manager.Instance.ReleaseSpace(building.coordinates);
-                    Destroy(building.gameObject);
+                    GridManager.instance.ReleaseSpace(structure.coordinates);
+                    Destroy(structure.gameObject);
 
                     Debug.Log("Atrakcja i powi¹zane obiekty zosta³y usuniête!");
-                }
-                else 
-                {
-
-                    // Sprawdzamy, czy to prefab lasu
-                    Forest forest = hit.collider.GetComponent<Forest>();
-                    if (forest != null && player.balance >= forest.removalCost)
-                    {
-
-                        Grid_manager.Instance.ReleaseSpace(forest.coordinates);
-
-                        Destroy(forest.gameObject);
-
-                        Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                        Vector3 placementPosition = new Vector3(mouseWorldPosition.x, mouseWorldPosition.y, 0f);
-                  
-                        ShowFloatingText($"-{forest.removalCost}$", placementPosition);
-                        Debug.Log("Las zosta³ usuniêty!");
-                        
-                    }
-                }
+                                                 
             }
         }
     }

@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class Gate : Building
+public class Gate : Structure
 {
     public GameObject visitorPrefab;
     public float spawnInterval = 5f;

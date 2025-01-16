@@ -2,17 +2,31 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EconomyManager : MonoBehaviour
+public class EconomyManager : BaseManager<EconomyManager>
 {
-    // Start is called before the first frame update
-    void Start()
+    public float TotalIncome { get; private set; }
+    public float TotalExpenses { get; private set; }
+    public float CurrentBalance => TotalIncome - TotalExpenses;
+
+    public override void InitializeManager()
     {
-        
+        TotalIncome = 0f;
+        TotalExpenses = 0f;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void AddIncome(float amount)
     {
-        
+
+    }
+
+    public void AddExpense(float amount)
+    {
+
+    }
+
+    public override void ResetManager()
+    {
+        TotalIncome = 0f;
+        TotalExpenses = 0f;
     }
 }

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Camera_controller : MonoBehaviour
+public class CameraController : MonoBehaviour
 {
     public float dragSpeed = 2.0f;       
     public float zoomSpeed = 2.0f;    
