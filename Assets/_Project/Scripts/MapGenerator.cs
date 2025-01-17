@@ -7,10 +7,10 @@ public class MapGenerator : MonoBehaviour
 {
     public Tilemap tilemap; 
     public int mapWidth = 20;       
-    public int mapHeight = 20;     
-    public TileBase riverTile;    
+    public int mapHeight = 20;       
     public TileBase groundTile;
     public GameObject forestPrefab;
+    public GameObject riverPrefab;
 
 
     private int[,] mapGrid;         
@@ -155,24 +155,35 @@ public class MapGenerator : MonoBehaviour
     {
         tilemap.ClearAllTiles();
         for (int x = 0; x < mapWidth; x++)
+        {
             for (int y = 0; y < mapHeight; y++)
             {
                 Vector3Int tilePosition = new Vector3Int(x, y, 0);
                 Vector3 worldPosition = tilemap.GetCellCenterWorld(tilePosition);
 
                 if (mapGrid[x, y] == 1)
-                    tilemap.SetTile(tilePosition, riverTile);
+                {
+                    tilemap.SetTile(tilePosition, groundTile);
+                    GameObject riverObject = Instantiate(riverPrefab, worldPosition, Quaternion.identity);
+                    River river = riverObject.GetComponent<River>();
+                    river.coordinates.Add(new Vector2Int(x, y));
+                    GridManager.instance.OccupySpace(new Vector2Int(x, y), new Vector2Int(1, 1), river);
+                }
                 else if (mapGrid[x, y] == 2)
                 {
                     tilemap.SetTile(tilePosition, groundTile);
                     GameObject forestObject = Instantiate(forestPrefab, worldPosition, Quaternion.identity);
                     Forest forest = forestObject.GetComponent<Forest>();
-                    forest.coordinates.Add( new Vector2Int(x, y));
-                } 
+                    forest.coordinates.Add(new Vector2Int(x, y));
+                    GridManager.instance.OccupySpace(new Vector2Int(x, y), new Vector2Int(1, 1), forest);
+                }
                 else
+                {
                     tilemap.SetTile(tilePosition, groundTile);
+                }
             }
-        
+        }
     }
+
 
 }

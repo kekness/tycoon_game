@@ -45,11 +45,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f5ef1409aa636f499007a49229a31c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attractionName: 
-  size: {x: 2, y: 2}
-  cost: 0
-  revenue: 0
+  structureName: 
+  cost: 200
   coordinates: []
+  size: {x: 2, y: 2}
+  ticketCost: 0
+  entrance: {fileID: 0}
+  exit: {fileID: 0}
 --- !u!212 &1413853893835880803
 SpriteRenderer:
   m_ObjectHideFlags: 0

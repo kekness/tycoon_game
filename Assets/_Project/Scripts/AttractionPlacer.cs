@@ -5,6 +5,7 @@ using TMPro;
 
 public class AttractionPlacer : MonoBehaviour
 {
+
     public Tilemap tilemap;
     public List<GameObject> attractionPrefabs;
     private GameObject selectedAttractionPrefab;
@@ -19,6 +20,7 @@ public class AttractionPlacer : MonoBehaviour
     private bool isPlacingExit = false;
     public GameObject entrancePrefab;
     public GameObject exitPrefab;
+    public GameObject bridgePrefab;
 
     private GameObject ghostEntrance; // Ghost for entrance
     private GameObject ghostExit; // Ghost for exit
@@ -234,6 +236,8 @@ public class AttractionPlacer : MonoBehaviour
 
         if (GridManager.instance.IsSpaceAvailable(currentGridPosition, structure.size))
         {
+
+            // Kontynuuj normalne stawianie budynków, jeœli nie ma rzeki
             if (player.balance >= structure.cost)
             {
                 Vector3Int cellPosition = new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0);
@@ -247,12 +251,10 @@ public class AttractionPlacer : MonoBehaviour
                 placedStructure.coordinates = CalculateCoordinates(currentGridPosition, structure.size);
 
                 GridManager.instance.OccupySpace(currentGridPosition, structure.size);
-
                 player.balance -= structure.cost;
 
                 ShowFloatingText($"-{structure.cost}$", placementPosition);
 
-                // Jeœli budynek jest atrakcj¹, dodaj go do listy atrakcji i ustaw tryb wejœcia
                 if (placedStructure is Attraction attraction)
                 {
                     player.attractionList.Add(attraction);
@@ -269,11 +271,31 @@ public class AttractionPlacer : MonoBehaviour
                 Debug.Log("Nie masz wystarczaj¹cej iloœci pieniêdzy!");
             }
         }
-        else
+        else 
         {
-            Debug.Log("Nie mo¿na umieœciæ budynku tutaj!");
+            // SprawdŸ, czy na danym polu znajduje siê rzeka
+            River river = GridManager.instance.GetStructureAt<River>(currentGridPosition);
+
+            if (structure is Path && river != null && !river.isBridged)
+            {
+                Vector3 placementPosition = tilemap.GetCellCenterWorld(new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0));
+                GameObject bridgeObject = Instantiate(bridgePrefab, placementPosition, Quaternion.identity);
+
+                Bridge bridge = bridgeObject.GetComponent<Bridge>();
+                bridge.coordinates = CalculateCoordinates(currentGridPosition, structure.size);
+
+                GridManager.instance.OccupySpace(currentGridPosition, structure.size);
+                player.balance -= bridge.cost;
+                
+                ShowFloatingText($"-{bridge.cost}$", placementPosition);
+
+                Debug.Log("Most zosta³ postawiony!");
+                river.isBridged = true;
+                return;
+            }
         }
     }
+
 
 
 
@@ -302,17 +324,18 @@ public class AttractionPlacer : MonoBehaviour
 
             if (hit.collider != null)
             {
-                // Sprawdzamy, czy to Building (atrakcja)
+                // Sprawdzamy, czy to Structure (atrakcja)
                 Structure structure = hit.collider.GetComponent<Structure>();
                 if (structure != null)
                 {
 
                     // Sprawdzamy, czy to prefab lasu
                     Forest forest = hit.collider.GetComponent<Forest>();
-                    Debug.Log(forest);
+            
+
                     if (forest != null && player.balance >= forest.removalCost)
                     {
-                        Debug.Log(forest.removalCost + " chuj");
+      
                         GridManager.instance.ReleaseSpace(forest.coordinates);
 
                         Destroy(forest.gameObject);
@@ -324,9 +347,6 @@ public class AttractionPlacer : MonoBehaviour
                         Debug.Log("Las zosta³ usuniêty!");
 
                     }
-                }
-                
-                
                     if (structure is Attraction attraction)
                     {
                         if (attraction.entrance != null)
@@ -342,13 +362,18 @@ public class AttractionPlacer : MonoBehaviour
                         }
 
                         player.attractionList.Remove(attraction);
+
                     }
+                    if (!(structure is River river))
+                    {
+                        GridManager.instance.ReleaseSpace(structure.coordinates);
+                        Destroy(structure.gameObject);
+                    }
+                }   
 
-                    // Zwolnij miejsce i usuñ budynek
-                    GridManager.instance.ReleaseSpace(structure.coordinates);
-                    Destroy(structure.gameObject);
+                 
 
-                    Debug.Log("Atrakcja i powi¹zane obiekty zosta³y usuniête!");
+                Debug.Log("Atrakcja i powi¹zane obiekty zosta³y usuniête!");
                                                  
             }
         }

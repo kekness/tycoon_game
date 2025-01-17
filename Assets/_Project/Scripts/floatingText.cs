@@ -1,9 +1,9 @@
 using UnityEngine;
 using TMPro;
 
-public class FloatingText : MonoBehaviour
+public class floatingText : MonoBehaviour
 {
-    public float moveSpeed = 2f; // Szybkoœæ ruchu do góry
+    public float moveSpeed = 50f; // Szybkoœæ ruchu do góry
     public float fadeSpeed = 2f; // Szybkoœæ zanikania
 
     private TextMeshProUGUI textMesh;
