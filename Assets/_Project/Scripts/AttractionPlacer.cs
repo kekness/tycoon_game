@@ -14,7 +14,7 @@ public class AttractionPlacer : MonoBehaviour
     private Vector2Int currentGridPosition;
     public Player player;
     public GameObject floatingTextPrefab;
-    private bool deleteMode = false;
+    private bool deleteMode = false, inspectorMode = false;
     private Attraction lastPlacedAttraction;
     private bool isPlacingEntrance = false;
     private bool isPlacingExit = false;
@@ -53,7 +53,7 @@ public class AttractionPlacer : MonoBehaviour
                 PlaceExit();
             }
         }
-        else if (!deleteMode)
+        else if (!deleteMode && !inspectorMode)
         {
             UpdateGhostAttraction();
             if (Input.GetMouseButtonDown(0))
@@ -61,9 +61,34 @@ public class AttractionPlacer : MonoBehaviour
                 TryPlaceBuilding();
             }
         }
-        else
+        else if (deleteMode)
         {
             RemoveAttraction();
+        }
+        else if(inspectorMode)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero);
+                if (hit.collider != null)
+                {
+                    Attraction attraction = hit.collider.GetComponent<Attraction>();
+                    if (attraction != null)
+                    {
+                        Inspector inspector = FindObjectOfType<Inspector>();
+                        if (inspector == null)
+                        {
+                            Debug.LogError("Inspector not found in the scene!");
+                            return;
+                        }
+                        else
+                            Debug.LogError("8======D");
+                        if (inspector != null)
+                            inspector.ShowInspector(attraction);
+                    }
+                }
+            }
         }
     }
 
@@ -296,10 +321,6 @@ public class AttractionPlacer : MonoBehaviour
         }
     }
 
-
-
-
-
     private List<Vector2Int> CalculateCoordinates(Vector2Int startPosition, Vector2Int size)
     {
         List<Vector2Int> coordinates = new List<Vector2Int>();
@@ -425,5 +446,9 @@ public class AttractionPlacer : MonoBehaviour
     public void SelectAttraction3Tile() { SelectAttraction(3); }
     public void SelectGate() { SelectAttraction(4); }
     public void RemoveObject() { deleteMode = !deleteMode; }
+    public void InspectorMode()
+    {
+        inspectorMode = !inspectorMode;
+    }
     #endregion
 }
