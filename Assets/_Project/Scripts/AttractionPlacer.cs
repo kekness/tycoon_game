@@ -98,6 +98,8 @@ public class AttractionPlacer : MonoBehaviour
         {
             Vector3 placementPosition = tilemap.GetCellCenterWorld(new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0));
             GameObject entranceObject = Instantiate(entrancePrefab, placementPosition, Quaternion.identity);
+            SpriteRenderer renderer = entranceObject.GetComponent<SpriteRenderer>();
+            renderer.sortingOrder = Mathf.RoundToInt(-entranceObject.transform.position.y * 100);
 
             ExitEntry entrance = entranceObject.GetComponent<ExitEntry>();
             lastPlacedAttraction.entrance = entrance;
@@ -121,6 +123,8 @@ public class AttractionPlacer : MonoBehaviour
         {
             Vector3 placementPosition = tilemap.GetCellCenterWorld(new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0));
             GameObject exitObject = Instantiate(exitPrefab, placementPosition, Quaternion.identity);
+            SpriteRenderer renderer = exitObject.GetComponent<SpriteRenderer>();
+            renderer.sortingOrder = Mathf.RoundToInt(-exitObject.transform.position.y * 100);
 
             ExitEntry exit = exitObject.GetComponent<ExitEntry>();
             lastPlacedAttraction.exit = exit;
@@ -269,6 +273,9 @@ public class AttractionPlacer : MonoBehaviour
                 Vector3 placementPosition = tilemap.GetCellCenterWorld(cellPosition);
 
                 GameObject buildingObject = Instantiate(selectedAttractionPrefab, placementPosition, Quaternion.identity);
+                SpriteRenderer renderer = buildingObject.GetComponent<SpriteRenderer>();
+                renderer.sortingOrder = Mathf.RoundToInt(-buildingObject.transform.position.y * 100);
+
                 buildingObject.transform.localScale = ghostAttraction.transform.localScale;
                 buildingObject.transform.rotation = ghostAttraction.transform.rotation;
 

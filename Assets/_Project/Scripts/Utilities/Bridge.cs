@@ -5,7 +5,6 @@ using UnityEngine;
 public class Bridge : Path
 {
     public River underlyingRiver;
-    public int cost;
 
     public Bridge(string name, int baseCost, River river) : base(name, baseCost)
     {

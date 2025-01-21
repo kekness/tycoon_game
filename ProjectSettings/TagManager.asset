@@ -41,3 +41,21 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Background
+    uniqueID: 4168958085
+    locked: 0
+  - name: Water
+    uniqueID: 2667569155
+    locked: 0
+  - name: Paths
+    uniqueID: 974388755
+    locked: 0
+  - name: Visitors
+    uniqueID: 3267937537
+    locked: 0
+  - name: Attractions_Forests
+    uniqueID: 288793727
+    locked: 0
+  - name: UI
+    uniqueID: 3041393339
+    locked: 0

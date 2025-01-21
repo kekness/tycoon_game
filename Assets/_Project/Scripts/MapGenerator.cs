@@ -165,6 +165,7 @@ public class MapGenerator : MonoBehaviour
                 {
                     tilemap.SetTile(tilePosition, groundTile);
                     GameObject riverObject = Instantiate(riverPrefab, worldPosition, Quaternion.identity);
+
                     River river = riverObject.GetComponent<River>();
                     river.coordinates.Add(new Vector2Int(x, y));
                     GridManager.instance.OccupySpace(new Vector2Int(x, y), new Vector2Int(1, 1), river);
@@ -173,6 +174,7 @@ public class MapGenerator : MonoBehaviour
                 {
                     tilemap.SetTile(tilePosition, groundTile);
                     GameObject forestObject = Instantiate(forestPrefab, worldPosition, Quaternion.identity);
+
                     Forest forest = forestObject.GetComponent<Forest>();
                     forest.coordinates.Add(new Vector2Int(x, y));
                     GridManager.instance.OccupySpace(new Vector2Int(x, y), new Vector2Int(1, 1), forest);
@@ -184,6 +186,5 @@ public class MapGenerator : MonoBehaviour
             }
         }
     }
-
 
 }
