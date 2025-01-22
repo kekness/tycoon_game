@@ -21,7 +21,7 @@ public class AttractionPlacer : MonoBehaviour
     public GameObject entrancePrefab;
     public GameObject exitPrefab;
     public GameObject bridgePrefab;
-
+    private Structure currentStructure;
     private GameObject ghostEntrance; // Ghost for entrance
     private GameObject ghostExit; // Ghost for exit
     private SpriteRenderer entranceRenderer;
@@ -55,6 +55,7 @@ public class AttractionPlacer : MonoBehaviour
         }
         else if (!deleteMode && !inspectorMode)
         {
+            //UIManager.instance.updateGhostStructure(currentStructure);//
             UpdateGhostAttraction();
             if (Input.GetMouseButtonDown(0))
             {
@@ -76,19 +77,20 @@ public class AttractionPlacer : MonoBehaviour
                     Attraction attraction = hit.collider.GetComponent<Attraction>();
                     if (attraction != null)
                     {
-                        Inspector inspector = FindObjectOfType<Inspector>();
-                        if (inspector == null)
+                        // Znajdujemy mened¿era inspektorów
+                        UIManager inspectorManager = FindObjectOfType<UIManager>();
+                        if (inspectorManager == null)
                         {
-                            Debug.LogError("Inspector not found in the scene!");
+                            Debug.LogError("InspectorManager not found in the scene!");
                             return;
                         }
-                        else
-                            Debug.LogError("8======D");
-                        if (inspector != null)
-                            inspector.ShowInspector(attraction);
+
+                        // Tworzymy nowy inspektor dla klikniêtej atrakcji
+                        inspectorManager.ShowInspector(attraction);
                     }
                 }
             }
+
         }
     }
 
@@ -170,7 +172,7 @@ public class AttractionPlacer : MonoBehaviour
                 ghostAttraction = new GameObject("GhostAttraction");
                 ghostRenderer = ghostAttraction.AddComponent<SpriteRenderer>();
             }
-
+           // currentStructure = selectedAttractionPrefab.GetComponent<Structure>();//Tutaj próbowa³em robic odnosnie przenoszenia duszków do UIManagera
             ghostRenderer.sprite = selectedAttractionPrefab.GetComponent<SpriteRenderer>().sprite;
             ghostRenderer.sortingOrder = 10;
         }

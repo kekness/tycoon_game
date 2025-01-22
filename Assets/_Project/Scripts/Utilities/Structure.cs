@@ -8,4 +8,5 @@ public abstract class Structure : MonoBehaviour
     public float cost;
     public List<Vector2Int> coordinates = new List<Vector2Int>();
     public Vector2Int size = new Vector2Int(1, 1);
+    public Sprite sprite;
 }

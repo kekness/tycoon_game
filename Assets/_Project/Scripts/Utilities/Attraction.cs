@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 public class Attraction : Structure
 {
-    public int ticketCost;
+    public int ticketCost=10;
     public ExitEntry entrance;
     public ExitEntry exit;
-    public Sprite sprite;
+  
     
 }
