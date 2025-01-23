@@ -45,10 +45,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac623a84b7682a94d96e8eee72fbf558, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  structureName: 
+  structureName: bridge
   cost: 100
   coordinates: []
   size: {x: 0, y: 0}
+  sprite: {fileID: 0}
   points: []
   underlyingRiver: {fileID: 0}
 --- !u!212 &732960747093181440

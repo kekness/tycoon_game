@@ -80,4 +80,11 @@ public class GridManager : BaseManager<GridManager>
         }
         return null; // Nie znaleziono struktury
     }
+    public Vector2Int GetCurrentGridPosition()
+    {
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        worldPosition.z = 0;
+        Vector3Int cellPosition = tilemap.WorldToCell(worldPosition);
+        return new Vector2Int(cellPosition.x, cellPosition.y);
+    }
 }

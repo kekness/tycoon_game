@@ -95,10 +95,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16a6d76fc29d27b4588f970db0dc8221, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  structureName: 
+  structureName: gate
   cost: 0
   coordinates: []
   size: {x: 2, y: 1}
+  sprite: {fileID: 0}
   visitorPrefab: {fileID: 7472694012220629480, guid: 2bd3410d957b74a45968feddd143345f, type: 3}
   spawnInterval: 5
   maxVisitors: 10

@@ -95,9 +95,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 759cf917ce15cdb43858f6df79b03e89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  structureName: 
+  structureName: entry
   cost: 0
   coordinates: []
   size: {x: 1, y: 1}
+  sprite: {fileID: 0}
   size: {x: 1, y: 1}
   coordinates: []

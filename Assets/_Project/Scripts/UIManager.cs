@@ -7,9 +7,12 @@ using UnityEngine.Tilemaps;
 public class UIManager : BaseManager<UIManager>
 {
     public GameObject inspectorPrefab;
-    public Transform parentCanvas;   
+    public Transform parentCanvas;
+    GameObject ghostObject;
+    SpriteRenderer ghostRenderer = new SpriteRenderer();
 
     private List<GameObject> openInspectors = new List<GameObject>();
+
     public void Awake()
     {
         base.InitializeManager();
@@ -29,33 +32,24 @@ public class UIManager : BaseManager<UIManager>
         openInspectors.Remove(inspector);
         Destroy(inspector);
     }
-   /* public void updateGhostStructure(Structure str)
+
+    public void UpdateGhostStructure(Structure structure, bool isAvailable)
     {
-        // Tworzymy obiekt ducha, jeœli jeszcze nie istnieje
-
-            string ghostName = str.structureName;
-            GameObject ghostObject = new GameObject(ghostName);
-            SpriteRenderer ghostRenderer = new SpriteRenderer();
+        if (ghostObject == null)
+        {
+            ghostObject = new GameObject("Ghost");
             ghostRenderer = ghostObject.AddComponent<SpriteRenderer>();
-            ghostRenderer.sprite = str.GetComponent<SpriteRenderer>().sprite;
             ghostRenderer.sortingOrder = 10;
+        }
 
+        ghostRenderer.sprite = structure.GetComponent<SpriteRenderer>().sprite;
 
-        // Aktualizujemy pozycjê ducha
-        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        worldPosition.z = 0;
-
-           Vector2Int currentGridPosition;
-         Vector3Int cellPosition = GridManager.instance.tilemap.WorldToCell(worldPosition);
-        currentGridPosition = new Vector2Int(cellPosition.x, cellPosition.y);
+        Vector2Int currentGridPosition = GridManager.instance.GetCurrentGridPosition();
+        Vector3Int cellPosition = new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0);
 
         ghostObject.transform.position = GridManager.instance.tilemap.GetCellCenterWorld(cellPosition);
 
-        // Sprawdzamy, czy przestrzeñ jest dostêpna
-        if (GridManager.instance.IsSpaceAvailable(currentGridPosition, str.size))
-            ghostRenderer.color = Color.green;
-        else
-            ghostRenderer.color = Color.red;
-    }*/
-   
+        ghostRenderer.color = isAvailable ? Color.green : Color.red;
+    }
+
 }

@@ -3,15 +3,14 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using TMPro;
 
-public class AttractionPlacer : MonoBehaviour
+public class AttractionPlacer : BaseManager<GridManager>
 {
 
     public Tilemap tilemap;
     public List<GameObject> attractionPrefabs;
     private GameObject selectedAttractionPrefab;
-    private GameObject ghostAttraction;
-    private SpriteRenderer ghostRenderer;
-    private Vector2Int currentGridPosition;
+
+    public Vector2Int currentGridPosition;
     public Player player;
     public GameObject floatingTextPrefab;
     private bool deleteMode = false, inspectorMode = false;
@@ -24,8 +23,11 @@ public class AttractionPlacer : MonoBehaviour
     private Structure currentStructure;
     private GameObject ghostEntrance; // Ghost for entrance
     private GameObject ghostExit; // Ghost for exit
-    private SpriteRenderer entranceRenderer;
-    private SpriteRenderer exitRenderer;
+
+    public void Awake()
+    {
+        base.InitializeManager();
+    }
 
     private void Start()
     {
@@ -37,26 +39,31 @@ public class AttractionPlacer : MonoBehaviour
 
     private void Update()
     {
-        if (isPlacingEntrance)
+        // Aktualizuj pozycjê kursora myszy na siatce
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        worldPosition.z = 0;
+        Vector3Int cellPosition = tilemap.WorldToCell(worldPosition);
+        currentGridPosition = new Vector2Int(cellPosition.x, cellPosition.y);
+
+        if (isPlacingEntrance || isPlacingExit)
         {
-            UpdateGhostEntrance();
+            // U¿yj UpdateGhostStructure do obs³ugi wejœcia/wyjœcia
+            Structure structure = isPlacingEntrance ? entrancePrefab.GetComponent<Structure>() : exitPrefab.GetComponent<Structure>();
+            UIManager.instance.UpdateGhostStructure(structure, IsAdjacentToAttraction(currentGridPosition));
+
             if (Input.GetMouseButtonDown(0))
             {
-                PlaceEntrance();
-            }
-        }
-        else if (isPlacingExit)
-        {
-            UpdateGhostExit();
-            if (Input.GetMouseButtonDown(0))
-            {
-                PlaceExit();
+                if (isPlacingEntrance)
+                    PlaceEntrance();
+                else if (isPlacingExit)
+                    PlaceExit();
             }
         }
         else if (!deleteMode && !inspectorMode)
         {
-            //UIManager.instance.updateGhostStructure(currentStructure);//
-            UpdateGhostAttraction();
+            // U¿yj UpdateGhostStructure do obs³ugi atrakcji
+            UIManager.instance.UpdateGhostStructure(currentStructure, true);
+
             if (Input.GetMouseButtonDown(0))
             {
                 TryPlaceBuilding();
@@ -66,7 +73,7 @@ public class AttractionPlacer : MonoBehaviour
         {
             RemoveAttraction();
         }
-        else if(inspectorMode)
+        else if (inspectorMode)
         {
             if (Input.GetMouseButtonDown(0))
             {
@@ -77,20 +84,16 @@ public class AttractionPlacer : MonoBehaviour
                     Attraction attraction = hit.collider.GetComponent<Attraction>();
                     if (attraction != null)
                     {
-                        // Znajdujemy mened¿era inspektorów
                         UIManager inspectorManager = FindObjectOfType<UIManager>();
                         if (inspectorManager == null)
                         {
                             Debug.LogError("InspectorManager not found in the scene!");
                             return;
                         }
-
-                        // Tworzymy nowy inspektor dla klikniêtej atrakcji
                         inspectorManager.ShowInspector(attraction);
                     }
                 }
             }
-
         }
     }
 
@@ -167,124 +170,35 @@ public class AttractionPlacer : MonoBehaviour
         {
             selectedAttractionPrefab = attractionPrefabs[index];
 
-            if (ghostAttraction == null)
-            {
-                ghostAttraction = new GameObject("GhostAttraction");
-                ghostRenderer = ghostAttraction.AddComponent<SpriteRenderer>();
-            }
-           // currentStructure = selectedAttractionPrefab.GetComponent<Structure>();//Tutaj próbowa³em robic odnosnie przenoszenia duszków do UIManagera
-            ghostRenderer.sprite = selectedAttractionPrefab.GetComponent<SpriteRenderer>().sprite;
-            ghostRenderer.sortingOrder = 10;
+        
+            currentStructure = selectedAttractionPrefab.GetComponent<Structure>();//Tutaj próbowa³em robic odnosnie przenoszenia duszków do UIManagera
+
         }
     }
 
-    private void UpdateGhostAttraction()
-    {
-        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        worldPosition.z = 0;
-
-        Vector3Int cellPosition = tilemap.WorldToCell(worldPosition);
-        currentGridPosition = new Vector2Int(cellPosition.x, cellPosition.y);
-
-        ghostAttraction.transform.position = tilemap.GetCellCenterWorld(cellPosition);
-        Structure structure = selectedAttractionPrefab.GetComponent<Structure>();
-
-        if (GridManager.instance.IsSpaceAvailable(currentGridPosition, structure.size))
-        {
-            ghostRenderer.color = Color.green;
-        }
-        else
-        {
-            ghostRenderer.color = Color.red;
-        }
-
-        if (Input.GetKeyDown(KeyCode.R) && structure is Attraction)
-        {
-            RotateAttraction();
-        }
-    }
-
-
-    private void UpdateGhostEntrance()
-    {
-        if (ghostEntrance == null)
-        {
-            ghostEntrance = new GameObject("GhostEntrance");
-            entranceRenderer = ghostEntrance.AddComponent<SpriteRenderer>();
-            entranceRenderer.sprite = entrancePrefab.GetComponent<SpriteRenderer>().sprite;
-            entranceRenderer.sortingOrder = 10;
-        }
-
-        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        worldPosition.z = 0;
-
-        Vector3Int cellPosition = tilemap.WorldToCell(worldPosition);
-        currentGridPosition = new Vector2Int(cellPosition.x, cellPosition.y);
-
-        ghostEntrance.transform.position = tilemap.GetCellCenterWorld(cellPosition);
-
-        if (GridManager.instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)))
-        {
-            entranceRenderer.color = Color.green;
-        }
-        else
-        {
-            entranceRenderer.color = Color.red;
-        }
-    }
-
-    private void UpdateGhostExit()
-    {
-        if (ghostExit == null)
-        {
-            ghostExit = new GameObject("GhostExit");
-            exitRenderer = ghostExit.AddComponent<SpriteRenderer>();
-            exitRenderer.sprite = exitPrefab.GetComponent<SpriteRenderer>().sprite;
-            exitRenderer.sortingOrder = 10;
-        }
-
-        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        worldPosition.z = 0;
-
-        Vector3Int cellPosition = tilemap.WorldToCell(worldPosition);
-        currentGridPosition = new Vector2Int(cellPosition.x, cellPosition.y);
-
-        ghostExit.transform.position = tilemap.GetCellCenterWorld(cellPosition);
-
-        if (GridManager.instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)))
-        {
-            exitRenderer.color = Color.green;
-        }
-        else
-        {
-            exitRenderer.color = Color.red;
-        }
-    }
 
     private void TryPlaceBuilding()
     {
         Structure structure = selectedAttractionPrefab.GetComponent<Structure>();
 
-        if (GridManager.instance.IsSpaceAvailable(currentGridPosition, structure.size))
-        {
+        // Pobierz aktualn¹ pozycjê siatki z GridManager
+        Vector2Int gridPosition = GridManager.instance.GetCurrentGridPosition();
 
-            // Kontynuuj normalne stawianie budynków, jeœli nie ma rzeki
+        if (GridManager.instance.IsSpaceAvailable(gridPosition, structure.size))
+        {
             if (player.balance >= structure.cost)
             {
-                Vector3Int cellPosition = new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0);
+                Vector3Int cellPosition = new Vector3Int(gridPosition.x, gridPosition.y, 0);
                 Vector3 placementPosition = tilemap.GetCellCenterWorld(cellPosition);
 
                 GameObject buildingObject = Instantiate(selectedAttractionPrefab, placementPosition, Quaternion.identity);
                 SpriteRenderer renderer = buildingObject.GetComponent<SpriteRenderer>();
                 renderer.sortingOrder = Mathf.RoundToInt(-buildingObject.transform.position.y * 100);
 
-                buildingObject.transform.localScale = ghostAttraction.transform.localScale;
-                buildingObject.transform.rotation = ghostAttraction.transform.rotation;
-
                 Structure placedStructure = buildingObject.GetComponent<Structure>();
-                placedStructure.coordinates = CalculateCoordinates(currentGridPosition, structure.size);
+                placedStructure.coordinates = CalculateCoordinates(gridPosition, structure.size);
 
-                GridManager.instance.OccupySpace(currentGridPosition, structure.size);
+                GridManager.instance.OccupySpace(gridPosition, structure.size);
                 player.balance -= structure.cost;
 
                 ShowFloatingText($"-{structure.cost}$", placementPosition);
@@ -305,22 +219,22 @@ public class AttractionPlacer : MonoBehaviour
                 Debug.Log("Nie masz wystarczaj¹cej iloœci pieniêdzy!");
             }
         }
-        else 
+        else
         {
             // SprawdŸ, czy na danym polu znajduje siê rzeka
-            River river = GridManager.instance.GetStructureAt<River>(currentGridPosition);
+            River river = GridManager.instance.GetStructureAt<River>(gridPosition);
 
             if (structure is Path && river != null && !river.isBridged)
             {
-                Vector3 placementPosition = tilemap.GetCellCenterWorld(new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0));
+                Vector3 placementPosition = tilemap.GetCellCenterWorld(new Vector3Int(gridPosition.x, gridPosition.y, 0));
                 GameObject bridgeObject = Instantiate(bridgePrefab, placementPosition, Quaternion.identity);
 
                 Bridge bridge = bridgeObject.GetComponent<Bridge>();
-                bridge.coordinates = CalculateCoordinates(currentGridPosition, structure.size);
+                bridge.coordinates = CalculateCoordinates(gridPosition, structure.size);
 
-                GridManager.instance.OccupySpace(currentGridPosition, structure.size);
+                GridManager.instance.OccupySpace(gridPosition, structure.size);
                 player.balance -= bridge.cost;
-                
+
                 ShowFloatingText($"-{bridge.cost}$", placementPosition);
 
                 Debug.Log("Most zosta³ postawiony!");
@@ -436,16 +350,6 @@ public class AttractionPlacer : MonoBehaviour
         }
     }
 
-    private void RotateAttraction()
-    {
-        selectedAttractionPrefab.GetComponent<Attraction>().size =
-            new Vector2Int(selectedAttractionPrefab.GetComponent<Attraction>().size.y,
-                           selectedAttractionPrefab.GetComponent<Attraction>().size.x);
-
-        Vector3 scale = ghostAttraction.transform.localScale;
-        scale.x *= -1;
-        ghostAttraction.transform.localScale = scale;
-    }
 
     #region buttons
     // Buttony dla atrakcji

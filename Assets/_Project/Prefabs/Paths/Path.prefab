@@ -122,8 +122,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e867cd22c869c164ebc03b6efee68484, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  structureName: 
+  structureName: path
   cost: 50
   coordinates: []
   size: {x: 1, y: 1}
+  sprite: {fileID: 0}
   points: []
