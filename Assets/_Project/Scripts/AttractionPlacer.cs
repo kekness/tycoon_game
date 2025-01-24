@@ -49,7 +49,7 @@ public class AttractionPlacer : BaseManager<GridManager>
         {
             // Uøyj UpdateGhostStructure do obs≥ugi wejúcia/wyjúcia
             Structure structure = isPlacingEntrance ? entrancePrefab.GetComponent<Structure>() : exitPrefab.GetComponent<Structure>();
-            UIManager.instance.UpdateGhostStructure(structure, IsAdjacentToAttraction(currentGridPosition));
+            UIManager.instance.UpdateGhostStructure(structure, IsAdjacentToAttraction(currentGridPosition,lastPlacedAttraction)&&GridManager.instance.IsSpaceAvailable(currentGridPosition,structure.size));
 
             if (Input.GetMouseButtonDown(0))
             {
@@ -62,7 +62,7 @@ public class AttractionPlacer : BaseManager<GridManager>
         else if (!deleteMode && !inspectorMode)
         {
             // Uøyj UpdateGhostStructure do obs≥ugi atrakcji
-            UIManager.instance.UpdateGhostStructure(currentStructure, true);
+            UIManager.instance.UpdateGhostStructure(currentStructure, GridManager.instance.IsSpaceAvailable(currentGridPosition,currentStructure.size));
 
             if (Input.GetMouseButtonDown(0))
             {
@@ -99,7 +99,7 @@ public class AttractionPlacer : BaseManager<GridManager>
 
     private void PlaceEntrance()
     {
-        if (GridManager.instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)) && IsAdjacentToAttraction(currentGridPosition))
+        if (GridManager.instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)) && IsAdjacentToAttraction(currentGridPosition,lastPlacedAttraction))
         {
             Vector3 placementPosition = tilemap.GetCellCenterWorld(new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0));
             GameObject entranceObject = Instantiate(entrancePrefab, placementPosition, Quaternion.identity);
@@ -124,7 +124,7 @@ public class AttractionPlacer : BaseManager<GridManager>
 
     private void PlaceExit()
     {
-        if (GridManager.instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)) && IsAdjacentToAttraction(currentGridPosition))
+        if (GridManager.instance.IsSpaceAvailable(currentGridPosition, new Vector2Int(1, 1)) && IsAdjacentToAttraction(currentGridPosition,lastPlacedAttraction))
         {
             Vector3 placementPosition = tilemap.GetCellCenterWorld(new Vector3Int(currentGridPosition.x, currentGridPosition.y, 0));
             GameObject exitObject = Instantiate(exitPrefab, placementPosition, Quaternion.identity);
@@ -146,11 +146,8 @@ public class AttractionPlacer : BaseManager<GridManager>
         }
     }
 
-    private bool IsAdjacentToAttraction(Vector2Int position)
-    {
-        // Przeszukaj wszystkie atrakcje i sprawdü, czy sπsiadujπ z danym punktem
-        foreach (var attraction in player.attractionList)
-        {
+    private bool IsAdjacentToAttraction(Vector2Int position,Attraction attraction)
+    { 
             foreach (var coord in attraction.coordinates)
             {
                 // Sprawdü sπsiedztwo w czterech kierunkach
@@ -159,7 +156,6 @@ public class AttractionPlacer : BaseManager<GridManager>
                     return true;
                 }
             }
-        }
         return false;
     }
 

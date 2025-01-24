@@ -40,6 +40,7 @@ public class UIManager : BaseManager<UIManager>
             ghostObject = new GameObject("Ghost");
             ghostRenderer = ghostObject.AddComponent<SpriteRenderer>();
             ghostRenderer.sortingOrder = 10;
+            ghostRenderer.sortingLayerName = "UI";
         }
 
         ghostRenderer.sprite = structure.GetComponent<SpriteRenderer>().sprite;
