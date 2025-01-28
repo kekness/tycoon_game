@@ -12141,6 +12141,7 @@ MonoBehaviour:
   groundTile: {fileID: 11400000, guid: 8527370ecea6eea46a0d3f5b40d4c08e, type: 2}
   forestPrefab: {fileID: 8556485365578565462, guid: 69663097e8e2b0e48b8bb81abcd2a9da, type: 3}
   riverPrefab: {fileID: 3473882186843628042, guid: a78b067cc60f5de4bac5dda213d1415b, type: 3}
+  boulderPrefab: {fileID: 6590440353722259356, guid: e8f9630b58c3c524d9fd103f63fb9ea6, type: 3}
 --- !u!4 &982055820
 Transform:
   m_ObjectHideFlags: 0

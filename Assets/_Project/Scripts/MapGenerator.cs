@@ -11,6 +11,7 @@ public class MapGenerator : MonoBehaviour
     public TileBase groundTile;
     public GameObject forestPrefab;
     public GameObject riverPrefab;
+    public GameObject boulderPrefab;
 
 
     private int[,] mapGrid;         
@@ -21,6 +22,7 @@ public class MapGenerator : MonoBehaviour
         GenerateMap();
         GenerateForests();
         GenerateRiver();
+        GenerateBoulders();
         RenderMap();
     }
     void GenerateMap()
@@ -39,29 +41,41 @@ public class MapGenerator : MonoBehaviour
 
         while (currentPosition.x < mapWidth-1)
         {
-          
             mapGrid[currentPosition.x, currentPosition.y] = 1;
             GridManager.instance.OccupySpace(currentPosition, new Vector2Int(1, 1));
 
             int direction = Random.Range(0, 3);
 
             if (direction == 0) 
-            {
                 currentPosition.x++;
-            }
             else if (direction == 1 && currentPosition.y < mapHeight - 1) 
-            {
                 currentPosition.y++;
-            }
             else if (direction == 2 && currentPosition.y > 0) 
-            {
                 currentPosition.y--;
-            }
 
             currentPosition.x = Mathf.Clamp(currentPosition.x, 0, mapWidth - 1);
             currentPosition.y = Mathf.Clamp(currentPosition.y, 0, mapHeight - 1);
         }
     }
+    void GenerateBoulders()
+    {
+        float scale = 0.1f; // Skala szumu
+        float threshold = 0.7f; // Próg, powy¿ej którego generujemy kamieñ
+
+        for (int x = 0; x < mapWidth; x++)
+        {
+            for (int y = 0; y < mapHeight; y++)
+            {
+                float sample = Mathf.PerlinNoise(x * scale, y * scale);
+
+                if (sample > threshold && mapGrid[x, y] == 0)
+                {
+                    mapGrid[x, y] = 3;
+                }
+            }
+        }
+    }
+
     void GenerateForests()
     {
         List<RectInt> partitions = BSPPartition(new RectInt(0, 0, mapWidth, mapHeight), 4);
@@ -74,7 +88,7 @@ public class MapGenerator : MonoBehaviour
             }
         }
     }
-
+  
     void CreateNaturalForest(RectInt partition)
     {
       
@@ -160,10 +174,9 @@ public class MapGenerator : MonoBehaviour
             {
                 Vector3Int tilePosition = new Vector3Int(x, y, 0);
                 Vector3 worldPosition = tilemap.GetCellCenterWorld(tilePosition);
-
+                tilemap.SetTile(tilePosition, groundTile);
                 if (mapGrid[x, y] == 1)
                 {
-                    tilemap.SetTile(tilePosition, groundTile);
                     GameObject riverObject = Instantiate(riverPrefab, worldPosition, Quaternion.identity);
 
                     River river = riverObject.GetComponent<River>();
@@ -172,16 +185,19 @@ public class MapGenerator : MonoBehaviour
                 }
                 else if (mapGrid[x, y] == 2)
                 {
-                    tilemap.SetTile(tilePosition, groundTile);
                     GameObject forestObject = Instantiate(forestPrefab, worldPosition, Quaternion.identity);
 
                     Forest forest = forestObject.GetComponent<Forest>();
                     forest.coordinates.Add(new Vector2Int(x, y));
                     GridManager.instance.OccupySpace(new Vector2Int(x, y), new Vector2Int(1, 1), forest);
                 }
-                else
+                else if (mapGrid[x, y] == 3)
                 {
-                    tilemap.SetTile(tilePosition, groundTile);
+                    GameObject forestObject = Instantiate(boulderPrefab, worldPosition, Quaternion.identity);
+
+                    Boulder boulder = forestObject.GetComponent<Boulder>();
+                    boulder.coordinates.Add(new Vector2Int(x, y));
+                    GridManager.instance.OccupySpace(new Vector2Int(x, y), new Vector2Int(1, 1), boulder);
                 }
             }
         }
