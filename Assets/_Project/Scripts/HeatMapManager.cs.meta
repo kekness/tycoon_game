@@ -3,7 +3,8 @@ guid: be8e6e13a07ee8f43a32147878c0ce19
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - heatmapPanelPrefab: {fileID: 6552161958668174356, guid: 8c5a7bd90b029c1448442b3e7d84317c, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

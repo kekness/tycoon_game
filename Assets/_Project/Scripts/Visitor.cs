@@ -52,7 +52,7 @@ public class Visitor : MonoBehaviour
         }
     }
     private float lastRecordTime = 0f;
-    private float recordIntervalGameSeconds = 60f; // Co 60 sekund czasu gry
+    private float recordIntervalGameSeconds = 1f; // Co 60 sekund czasu gry
 
     public Vector2Int GetCurrentGridPosition()
     {
