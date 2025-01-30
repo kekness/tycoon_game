@@ -199,6 +199,8 @@ public class AttractionPlacer : BaseManager<GridManager>
 
                 ShowFloatingText($"-{structure.cost}$", placementPosition);
 
+                PathManager.instance.DisplayGridPath();
+       
                 if (placedStructure is Attraction attraction)
                 {
                     player.attractionList.Add(attraction);

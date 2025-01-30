@@ -1,58 +1,136 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class Visitor : MonoBehaviour
 {
-    public float speed = 2f; // Prêdkoœæ poruszania siê odwiedzaj¹cego
-    private Attraction targetAttraction;
     public int hunger;
     public int thirst;
     public int happiness;
     public int disgust;
     public int fear;
+    public Tilemap tilemap;
 
-    void Start()
+    public float speed = 2f;
+    private Queue<Vector3> pathPoints = new Queue<Vector3>();
+
+    private void Awake()
     {
-        ChooseRandomAttraction();
+        tilemap = AttractionPlacer.instance?.tilemap;
+    }
+    private Vector3 lastPosition;
+    private float stuckThreshold = 0.1f; // Odleg³oœæ, przy której uznajemy, ¿e NPC utkn¹³
+
+    private void Update()
+    {
+        // SprawdŸ, czy NPC utkn¹³ w tym samym miejscu
+        if (Vector3.Distance(lastPosition, transform.position) < stuckThreshold && pathPoints.Count > 0)
+        {
+            Debug.LogError("NPC is stuck, trying to re-evaluate path.");
+            // Mo¿na tu spróbowaæ ponownie obliczyæ œcie¿kê lub coœ naprawiæ
+        }
+
+        lastPosition = transform.position;
+
+        // Kontynuuj ruch, jeœli jest œcie¿ka do przejœcia
+        if (pathPoints.Count > 0 && !isMoving)
+        {
+            MoveToNextPoint();
+        }
+    }
+    public Vector2Int GetCurrentGridPosition()
+    {
+        if (tilemap == null)
+        {
+            Debug.LogError("Tilemap is not assigned!");
+            return new Vector2Int(-1, -1);
+        }
+
+        // Konwersja pozycji œwiata na siatkê
+        Vector3Int cellPosition = tilemap.WorldToCell(transform.position);
+        return new Vector2Int(cellPosition.x, cellPosition.y);
     }
 
-    void Update()
+    private bool isMoving; // Flaga, ¿eby unikn¹æ nadmiernych wywo³añ MoveToNextPoint
+
+    // Funkcja, aby NPC szed³ do losowej atrakcji
+    public void MoveToRandomAttraction()
     {
-        if (targetAttraction != null)
+        // Losowanie atrakcji
+        Attraction randomAttraction = Player.instance.GetRandomAttraction();
+
+        if (randomAttraction != null)
         {
-            MoveTowardsAttraction();
+            Vector2Int target = randomAttraction.entrance.coordinates[0]; // Wejœcie atrakcji
+            Debug.Log("Moving to target: " + target);
+
+            // Ustal startow¹ i docelow¹ pozycjê
+            Vector2Int start = GetCurrentGridPosition();
+            MoveNPC(start, target);
+            Debug.Log($"Visitor current grid position: {start}");
+        }
+        else
+        {
+            Debug.LogError("Brak atrakcji w grze!");
         }
     }
 
-    private void ChooseRandomAttraction()
+    public void MoveNPC(Vector2Int start, Vector2Int target)
     {
-        if (FindObjectOfType<Player>().attractionList.Count > 0)
+        Pathfinding pathfinding = new Pathfinding();
+        List<Vector2Int> path = pathfinding.FindPath(start, target);
+
+        if (path.Count > 0)
         {
-            int randomIndex = Random.Range(0, FindObjectOfType<Player>().attractionList.Count);
-            targetAttraction = FindObjectOfType<Player>().attractionList[randomIndex];
+            Debug.Log("Path found, moving NPC.");
+            SetPath(path);
+        }
+        else
+        {
+            Debug.LogError("No path found to target!");
         }
     }
 
-    private void MoveTowardsAttraction()
+
+    public void SetPath(List<Vector2Int> path)
     {
-        Vector3 targetPosition = targetAttraction.transform.position;
+        pathPoints.Clear();
 
-        // Ruch w kierunku atrakcji
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime);
-
-        // SprawdŸ, czy odwiedzaj¹cy dotar³ do atrakcji
-        if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
+        foreach (var tilePosition in path)
         {
-            StartCoroutine(StayAtAttraction());
+            Vector3 worldPosition = tilemap.GetCellCenterWorld(new Vector3Int(tilePosition.x, tilePosition.y, 0));
+            pathPoints.Enqueue(worldPosition);
+        }
+
+        if (pathPoints.Count > 0) MoveToNextPoint();
+    }
+
+    private void MoveToNextPoint()
+    {
+        if (pathPoints.Count > 0)
+        {
+            Vector3 nextPoint = pathPoints.Dequeue();
+            Debug.Log("Moving to next point: " + nextPoint);
+            StartCoroutine(MoveToPosition(nextPoint));
         }
     }
 
-    private IEnumerator StayAtAttraction()
-    {
-        // Odwiedzaj¹cy spêdza chwilê przy atrakcji
-        yield return new WaitForSeconds(Random.Range(2, 5));
 
-        // Wybór nowej atrakcji
-        ChooseRandomAttraction();
+    private IEnumerator MoveToPosition(Vector3 targetPosition)
+    {
+        isMoving = true;
+        Debug.Log("Start moving towards: " + targetPosition);
+
+        while (Vector3.Distance(transform.position, targetPosition) > 0.1f)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime);
+            yield return null;
+        }
+
+        Debug.Log("Arrived at target: " + targetPosition);
+        isMoving = false;
+        MoveToNextPoint();
     }
+
 }

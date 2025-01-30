@@ -5,22 +5,18 @@ using UnityEngine;
 public class Path : Structure
 {
 
-    public List<Vector3Int> points = new List<Vector3Int>();
-
+    private void Start()
+    {
+        PathManager.instance.registerPath(coordinates[0]);
+    }
     public Path(string name, int cost)
     {
         this.structureName = name;
         this.cost = cost;
     }
-
-    public virtual void AddPoint(Vector3Int point)
+    private void OnDestroy()
     {
-        points.Add(point);
-    }
-
-    public virtual void RemovePoint(Vector3Int point)
-    {
-        points.Remove(point);
+        PathManager.instance.unRegisterPath(coordinates[0]);
     }
 
 }
