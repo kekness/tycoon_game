@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ClockUI : MonoBehaviour
+public class ClockUI : BaseManager<ClockUI>
 {
     public RectTransform hourHand;
     public RectTransform minuteHand;
@@ -16,28 +16,39 @@ public class ClockUI : MonoBehaviour
     {
         newDay(); 
     }
+    private void Awake()
+    {
+        base.InitializeManager();
+    }
+
+    private bool hasDisplayedHeatmap = false; // Flaga, ¿eby nie wywo³ywaæ wielokrotnie
 
     void Update()
     {
+        gameTime += Time.deltaTime * gameTimeScale * accList[accIndex];
 
-        gameTime += Time.deltaTime * gameTimeScale*accList[accIndex];
+        float gameHours = (gameTime / 3600.0f) % 24; // Czas w godzinach (0-23)
+        float gameMinutes = (gameTime / 60.0f) % 60; // Minuty
 
-        float gameHours = (gameTime / 3600.0f) % 12;
-        float gameMinutes = (gameTime / 60.0f) % 60;
-
-  
-        float hourAngle = gameHours * 30.0f; 
-        float minuteAngle = gameMinutes * 6.0f; 
-
-        
-        hourHand.localRotation = Quaternion.Euler(0, 0, -hourAngle);
-        minuteHand.localRotation = Quaternion.Euler(0, 0, -minuteAngle);
-
+        hourHand.localRotation = Quaternion.Euler(0, 0, -gameHours * 30.0f);
+        minuteHand.localRotation = Quaternion.Euler(0, 0, -gameMinutes * 6.0f);
 
         if (Input.GetKeyDown(KeyCode.N))
         {
-            newDay();
+            NewDay();
         }
+
+        if (gameHours >= 22 && !hasDisplayedHeatmap)
+        {
+            hasDisplayedHeatmap = true;
+            HeatMapManager.instance.DisplayHeatmap(); // Wyœwietl heatmapê
+        }
+    }
+
+    void NewDay()
+    {
+        gameTime = 8 * 3600; // Reset do 8:00 rano
+        hasDisplayedHeatmap = false; // Reset flagi
     }
 
     void newDay()
@@ -65,5 +76,13 @@ public class ClockUI : MonoBehaviour
     public void reset()
     {
         accIndex = 0;
+    }
+    public float GetGameTime()
+    {
+        return gameTime;
+    }
+    public float getAcceleration()
+    {
+        return Time.deltaTime * gameTimeScale * accList[accIndex];
     }
 }

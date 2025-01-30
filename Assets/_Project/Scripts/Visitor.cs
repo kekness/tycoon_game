@@ -11,12 +11,13 @@ public class Visitor : MonoBehaviour
     public int disgust;
     public int fear;
     public Tilemap tilemap;
-
-    public float speed = 2f;
+    float gameTime;
+    public float speed;
     private Queue<Vector3> pathPoints = new Queue<Vector3>();
 
     private void Awake()
     {
+      
         tilemap = AttractionPlacer.instance?.tilemap;
     }
     private Vector3 lastPosition;
@@ -24,6 +25,17 @@ public class Visitor : MonoBehaviour
 
     private void Update()
     {
+        speed = 2f * (ClockUI.instance?.getAcceleration() ?? 1f);
+        gameTime = ClockUI.instance.GetGameTime(); // Pobierz czas gry
+        if (gameTime - lastRecordTime >= recordIntervalGameSeconds)
+        {
+            Vector2Int gridPos = GetCurrentGridPosition();
+            if (gridPos.x != -1 && gridPos.y != -1)
+            {
+                HeatMapManager.instance.RecordData(gridPos);
+            }
+            lastRecordTime = gameTime;
+        }
         // Sprawdü, czy NPC utknπ≥ w tym samym miejscu
         if (Vector3.Distance(lastPosition, transform.position) < stuckThreshold && pathPoints.Count > 0)
         {
@@ -39,6 +51,9 @@ public class Visitor : MonoBehaviour
             MoveToNextPoint();
         }
     }
+    private float lastRecordTime = 0f;
+    private float recordIntervalGameSeconds = 60f; // Co 60 sekund czasu gry
+
     public Vector2Int GetCurrentGridPosition()
     {
         if (tilemap == null)
