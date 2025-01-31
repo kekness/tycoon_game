@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class Player : BaseManager<Player>
 {
+    public int numberOfVisitors = 0;
+    public int DayNumber = 1;
     public float balance = 9999999;
     public float todaysEarnings = 0;
     public float todaysExpenses=0;
@@ -40,6 +42,26 @@ public class Player : BaseManager<Player>
     {
         balance += money;
         todaysEarnings += money;
+    }
+    public Attraction mostPopularAttraction()
+    {
+        if (attractionList == null || attractionList.Count == 0)
+        {
+            Debug.LogError("Attraction list is empty or null!");
+            return null; 
+        }
+
+        Attraction mostPopular = null;
+        int maxVisitations = int.MinValue;
+
+        foreach (var attraction in attractionList)
+            if (attraction.todaysVisitations > maxVisitations)
+            {
+                mostPopular = attraction;
+                maxVisitations = attraction.todaysVisitations;
+            }
+        
+        return mostPopular;
     }
 
 }

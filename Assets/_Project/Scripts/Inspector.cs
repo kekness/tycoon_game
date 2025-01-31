@@ -7,8 +7,7 @@ public class Inspector : PopUpWindow
     public TextMeshProUGUI attractionNameText;
     public TextMeshProUGUI visitationsCount;
     public InputField ticketCostInput;
-    public Image attractionImage; // Dodane pole do wyœwietlania sprite'a atrakcji
-
+    public Image attractionImage; 
     private Attraction selectedAttraction;
     private System.Action onCloseCallback;
 

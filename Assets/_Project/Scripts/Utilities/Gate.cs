@@ -26,6 +26,7 @@ public class Gate : Structure
     {
         if (visitorPrefab != null)
         {
+            Player.instance.numberOfVisitors++;
             // Pobierz pozycjê bramy na siatce
             Vector3Int gateCellPosition = AttractionPlacer.instance.tilemap.WorldToCell(transform.position);
 
