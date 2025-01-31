@@ -12,6 +12,7 @@ public class Player : BaseManager<Player>
     public float todaysExpenses=0;
     public TextMeshProUGUI balanceText;
     public List<Attraction> attractionList = new List<Attraction>();
+    public Gate gate;
     public void Awake()
     {
         base.InitializeManager();
@@ -64,4 +65,15 @@ public class Player : BaseManager<Player>
         return mostPopular;
     }
 
+    public void NewDay()
+    {
+        todaysEarnings = 0;
+        todaysExpenses = 0;
+        numberOfVisitors = 0;
+        DayNumber++;
+        foreach(Attraction atr in attractionList)
+        {
+            atr.todaysVisitations = 0;
+        }
+    }
 }

@@ -45,10 +45,6 @@ public class DaySummary : PopUpWindow
         mostPopularCountText.text = $"Odwiedzono {Player.instance.mostPopularAttraction().todaysVisitations} razy";
         mostPopularAttractionImage.sprite = Player.instance.mostPopularAttraction().attractionSprite;
 
-
-
-
-
     }
 
     private void DisplayHeatmap()
@@ -128,5 +124,11 @@ public class DaySummary : PopUpWindow
         {
             heatmapRawImage.gameObject.SetActive(!heatmapRawImage.gameObject.activeSelf);
         }
+    }
+    public void newDay()
+    {
+        Player.instance.NewDay();
+        HeatMapManager.instance.newDay();
+        ClockUI.instance.NewDay();
     }
 }

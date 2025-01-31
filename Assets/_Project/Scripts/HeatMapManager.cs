@@ -27,8 +27,9 @@ public class HeatMapManager : BaseManager<HeatMapManager>
         return heatData;
     }
 
-    public void ResetHeatData()
+    public void newDay()
     {
         heatData.Clear();
     }
+
 }

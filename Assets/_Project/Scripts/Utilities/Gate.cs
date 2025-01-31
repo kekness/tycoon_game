@@ -12,6 +12,7 @@ public class Gate : Structure
     {
         StartCoroutine(SpawnVisitors());
         PathManager.instance.registerPath(coordinates[0]);
+        Player.instance.gate = this;
     }
 
     private IEnumerator SpawnVisitors()
@@ -24,7 +25,7 @@ public class Gate : Structure
     }
     private void SpawnVisitor()
     {
-        if (visitorPrefab != null)
+        if (visitorPrefab != null && !ClockUI.instance.isTimeStopped)
         {
             Player.instance.numberOfVisitors++;
             // Pobierz pozycjê bramy na siatce

@@ -10,6 +10,8 @@ public class Visitor : MonoBehaviour
     public int happiness;
     public int disgust;
     public int fear;
+
+    private bool isLeaving = false;
     public Tilemap tilemap;
     float gameTime;
     public float speed;
@@ -32,12 +34,17 @@ public class Visitor : MonoBehaviour
         speed = 2f * (ClockUI.instance?.getAcceleration() ?? 1f);
         gameTime = ClockUI.instance.GetGameTime();
 
-        if (gameTime - lastRecordedTime >= 60f) 
+        if (gameTime - lastRecordedTime >= 60f)
         {
             RecordCurrentPosition();
-            lastRecordedTime = gameTime; 
+            lastRecordedTime = gameTime;
         }
 
+        // Sprawdzenie, czy jest godzina 22:00 lub póŸniej
+        if (gameTime / 3600f >= 22f)
+        {
+            Destroy(gameObject);
+        }
 
         if (pathPoints.Count > 0 && !isMoving)
         {
@@ -125,6 +132,12 @@ public class Visitor : MonoBehaviour
         }
         isMoving = false;
 
+        if (isLeaving && Player.instance.gate != null && GetCurrentGridPosition() == Player.instance.gate.coordinates[0])
+        {
+            Destroy(gameObject);
+            yield break;
+        }
+
         if (currentAttraction != null && GetCurrentGridPosition() == currentAttraction.entrance.coordinates[0])
         {
             StartCoroutine(VisitAttraction());
@@ -134,6 +147,8 @@ public class Visitor : MonoBehaviour
             MoveToNextPoint();
         }
     }
+
+
 
     private IEnumerator VisitAttraction()
     {
