@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class Inspector : MonoBehaviour
+public class Inspector : PopUpWindow
 {
     public TextMeshProUGUI attractionNameText;
     public InputField ticketCostInput;
@@ -23,11 +23,6 @@ public class Inspector : MonoBehaviour
         {
             selectedAttraction.ticketCost = newCost;
         }
-        CloseInspector();
-    }
-
-    public void CloseInspector()
-    {
-        Destroy(gameObject);
+        CloseWindow();
     }
 }

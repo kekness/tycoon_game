@@ -11,8 +11,6 @@ public class UIManager : BaseManager<UIManager>
     GameObject ghostObject;
     SpriteRenderer ghostRenderer = new SpriteRenderer();
 
-    private List<GameObject> openInspectors = new List<GameObject>();
-
     public void Awake()
     {
         base.InitializeManager();
@@ -20,17 +18,14 @@ public class UIManager : BaseManager<UIManager>
 
     public void ShowInspector(Attraction attraction)
     {
+
         GameObject newInspector = Instantiate(inspectorPrefab, parentCanvas);
-        openInspectors.Add(newInspector);
 
         Inspector inspector = newInspector.GetComponent<Inspector>();
-        inspector.SetupInspector(attraction, () => CloseInspector(newInspector));
-    }
 
-    public void CloseInspector(GameObject inspector)
-    {
-        openInspectors.Remove(inspector);
-        Destroy(inspector);
+        inspector.SetupInspector(attraction, () => {
+            Debug.Log("Inspector closed.");
+        });
     }
 
     public void UpdateGhostStructure(Structure structure, bool isAvailable)

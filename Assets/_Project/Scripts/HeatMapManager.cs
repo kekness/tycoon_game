@@ -13,9 +13,10 @@ public class HeatMapManager : BaseManager<HeatMapManager>
 
     public void Awake()
     {
+
         base.InitializeManager();
     }
- 
+
     public void RecordData(Vector2Int coordinates)
     {
         if (heatData.ContainsKey(coordinates))

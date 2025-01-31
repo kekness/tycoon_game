@@ -122,7 +122,7 @@ public class Visitor : MonoBehaviour
         Debug.Log("Visitor is enjoying the attraction...");
 
         float targetGameTime = ClockUI.instance.GetGameTime() + (currentAttraction.timeRequired * 60f);
-
+        currentAttraction.visit();
         while (ClockUI.instance.GetGameTime() < targetGameTime)
         {
             yield return null; // Czekamy do momentu, a¿ gra osi¹gnie docelowy czas
