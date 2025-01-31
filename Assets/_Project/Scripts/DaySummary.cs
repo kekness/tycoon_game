@@ -68,7 +68,7 @@ public class DaySummary : PopUpWindow
             Vector2Int pos = entry.Key;
             int visits = entry.Value;
 
-            float maxVisits = 250f; // Maksymalna liczba odwiedzin dla gradientu
+            float maxVisits = 25f; // Maksymalna liczba odwiedzin dla gradientu
             float intensity = Mathf.Clamp01(visits / maxVisits);
             Color heatColor = Color.Lerp(Color.blue, Color.red, intensity); // Gradient: niebieski -> czerwony
             texture.SetPixel(pos.x, pos.y, heatColor);

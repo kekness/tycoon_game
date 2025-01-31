@@ -11756,7 +11756,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 299155668}
         m_TargetAssemblyTypeName: ClockUI, Assembly-CSharp
-        m_MethodName: reset
+        m_MethodName: resetAcceleration
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -12089,6 +12089,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   balance: 10000
+  todaysEarnings: 0
+  todaysExpenses: 0
   balanceText: {fileID: 2043528834}
   attractionList: []
 --- !u!4 &816180855
@@ -12117,7 +12119,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be8e6e13a07ee8f43a32147878c0ce19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  heatmapPanelPrefab: {fileID: 5301310628034836594, guid: 8c5a7bd90b029c1448442b3e7d84317c, type: 3}
 --- !u!1 &982055818
 GameObject:
   m_ObjectHideFlags: 0
@@ -12452,6 +12453,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inspectorPrefab: {fileID: 4825322067963009404, guid: 354315b824752f94bb2e626e4df2eb5f, type: 3}
+  daySummaryPrefab: {fileID: 5301310628034836594, guid: 8c5a7bd90b029c1448442b3e7d84317c, type: 3}
   parentCanvas: {fileID: 271504133}
 --- !u!4 &1154716803
 Transform:

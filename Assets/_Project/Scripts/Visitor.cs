@@ -16,7 +16,7 @@ public class Visitor : MonoBehaviour
     private Queue<Vector3> pathPoints = new Queue<Vector3>();
     private bool isMoving;
     private Attraction currentAttraction;
-
+    private float lastRecordedTime = 0f;
     private void Awake()
     {
         tilemap = AttractionPlacer.instance?.tilemap;
@@ -31,6 +31,13 @@ public class Visitor : MonoBehaviour
     {
         speed = 2f * (ClockUI.instance?.getAcceleration() ?? 1f);
         gameTime = ClockUI.instance.GetGameTime();
+
+        if (gameTime - lastRecordedTime >= 60f) 
+        {
+            RecordCurrentPosition();
+            lastRecordedTime = gameTime; 
+        }
+
 
         if (pathPoints.Count > 0 && !isMoving)
         {
@@ -61,6 +68,14 @@ public class Visitor : MonoBehaviour
         {
             Debug.LogError("Brak atrakcji w grze!");
         }
+    }
+    private void RecordCurrentPosition()
+    {
+        Vector2Int currentGridPosition = GetCurrentGridPosition();
+
+            HeatMapManager.instance.RecordData(currentGridPosition);
+            Debug.Log($"Visitor recorded position: {currentGridPosition}");
+
     }
 
     public void MoveNPC(Vector2Int start, Vector2Int target)

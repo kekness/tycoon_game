@@ -1254,6 +1254,7 @@ MonoBehaviour:
   attractionNameText: {fileID: 4825322066198043635}
   visitationsCount: {fileID: 4825322066572644931}
   ticketCostInput: {fileID: 4825322067923964086}
+  attractionImage: {fileID: 4825322067273076200}
 --- !u!1 &4825322068051393389
 GameObject:
   m_ObjectHideFlags: 0

@@ -50,10 +50,13 @@ MonoBehaviour:
   coordinates: []
   size: {x: 2, y: 1}
   sprite: {fileID: 21300000, guid: f6b8554d59c391e46a6e29bc7336aef2, type: 3}
+  isOpen: 1
   ticketCost: 0
+  todaysVisitations: 0
   entrance: {fileID: 0}
   exit: {fileID: 0}
   timeRequired: 5
+  attractionSprite: {fileID: 21300000, guid: f6b8554d59c391e46a6e29bc7336aef2, type: 3}
 --- !u!212 &8771668255421633740
 SpriteRenderer:
   m_ObjectHideFlags: 0
