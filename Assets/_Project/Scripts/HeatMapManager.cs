@@ -15,7 +15,7 @@ public class HeatMapManager : BaseManager<HeatMapManager>
     {
         base.InitializeManager();
     }
-
+ 
     public void RecordData(Vector2Int coordinates)
     {
         if (heatData.ContainsKey(coordinates))
@@ -62,7 +62,7 @@ public class HeatMapManager : BaseManager<HeatMapManager>
             int visits = entry.Value;
 
             // Skalowanie kolorów na podstawie maksymalnej liczby odwiedzin
-            float maxVisits = 10f; // Maksymalna liczba odwiedzin dla gradientu
+            float maxVisits = 250f; // Maksymalna liczba odwiedzin dla gradientu
             float intensity = Mathf.Clamp01(visits / maxVisits);
             Color heatColor = Color.Lerp(Color.blue, Color.red, intensity); // Gradient: niebieski -> czerwony
             texture.SetPixel(pos.x, pos.y, heatColor);

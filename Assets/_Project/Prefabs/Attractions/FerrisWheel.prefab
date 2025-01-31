@@ -53,6 +53,7 @@ MonoBehaviour:
   ticketCost: 0
   entrance: {fileID: 0}
   exit: {fileID: 0}
+  timeRequired: 5
 --- !u!212 &8771668255421633740
 SpriteRenderer:
   m_ObjectHideFlags: 0

@@ -32,12 +32,6 @@ public class Gate : Structure
             // Umieœæ Visitora w œrodku komórki siatki
             Vector3 visitorPosition = AttractionPlacer.instance.tilemap.GetCellCenterWorld(gateCellPosition);
             GameObject visitorObject = Instantiate(visitorPrefab, visitorPosition, Quaternion.identity);
-
-            Visitor visitor = visitorObject.GetComponent<Visitor>();
-
-            Debug.Log($"Visitor spawned at grid position: {gateCellPosition}, world position: {visitorPosition}");
-
-            visitor.MoveToRandomAttraction();
         }
         else
         {
