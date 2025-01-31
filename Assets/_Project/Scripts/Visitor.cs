@@ -76,7 +76,10 @@ public class Visitor : MonoBehaviour
             Debug.LogError("No path found to target!");
         }
     }
-
+    public void Pay(float money)
+    {
+        Player.instance.getMoney(money);
+    }
     public void SetPath(List<Vector2Int> path)
     {
         pathPoints.Clear();
@@ -123,6 +126,7 @@ public class Visitor : MonoBehaviour
 
         float targetGameTime = ClockUI.instance.GetGameTime() + (currentAttraction.timeRequired * 60f);
         currentAttraction.visit();
+        Pay(currentAttraction.ticketCost);
         while (ClockUI.instance.GetGameTime() < targetGameTime)
         {
             yield return null; // Czekamy do momentu, a¿ gra osi¹gnie docelowy czas

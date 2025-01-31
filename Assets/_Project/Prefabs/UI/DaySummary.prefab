@@ -219,7 +219,7 @@ GameObject:
   - component: {fileID: 5301310627267081057}
   - component: {fileID: 5301310627267081056}
   m_Layer: 5
-  m_Name: wydatek (1)
+  m_Name: Total
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -838,6 +838,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e3e065d3f4304047b22ee3046438f30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ExpensesText: {fileID: 5301310629146110568}
+  EarningsText: {fileID: 5301310627676696307}
+  TotalText: {fileID: 5301310627267081056}
+  heatmapRawImage: {fileID: 5301310627177822327}
 --- !u!1 &5301310628231830613
 GameObject:
   m_ObjectHideFlags: 0

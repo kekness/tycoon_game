@@ -1252,6 +1252,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attractionNameText: {fileID: 4825322066198043635}
+  visitationsCount: {fileID: 4825322066572644931}
   ticketCostInput: {fileID: 4825322067923964086}
 --- !u!1 &4825322068051393389
 GameObject:

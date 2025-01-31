@@ -195,7 +195,7 @@ public class AttractionPlacer : BaseManager<GridManager>
                 placedStructure.coordinates = CalculateCoordinates(gridPosition, structure.size);
 
                 GridManager.instance.OccupySpace(gridPosition, structure.size);
-                player.balance -= structure.cost;
+                player.pay(structure.cost);
 
                 ShowFloatingText($"-{structure.cost}$", placementPosition);
 
@@ -231,7 +231,7 @@ public class AttractionPlacer : BaseManager<GridManager>
                 bridge.coordinates = CalculateCoordinates(gridPosition, structure.size);
 
                 GridManager.instance.OccupySpace(gridPosition, structure.size);
-                player.balance -= bridge.cost;
+                player.pay(bridge.cost);
 
                 ShowFloatingText($"-{bridge.cost}$", placementPosition);
 
