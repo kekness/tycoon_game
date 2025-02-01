@@ -33,4 +33,14 @@ public class Boulder : Obstacle
         }
         spriteRenderer.sprite = sprites[stage - 1];
     }
+    public float GetBoulderRemovalCost(int stage)
+    {
+        switch (stage)
+        {
+            case 3: return 150;
+            case 2: return 100;
+            case 1: return 50;
+            default: return 0; // Jeœli coœ posz³o nie tak, nic nie kosztuje
+        }
+    }
 }

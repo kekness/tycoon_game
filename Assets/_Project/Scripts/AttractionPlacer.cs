@@ -266,60 +266,72 @@ public class AttractionPlacer : BaseManager<GridManager>
 
             if (hit.collider != null)
             {
-                // Sprawdzamy, czy to Structure (atrakcja)
-                Structure structure = hit.collider.GetComponent<Structure>();
-                if (structure != null)
+                Debug.Log($"Klikniêto na: {hit.collider.gameObject.name}");
+
+                // Usuwanie kamieni (Boulder)
+                Boulder boulder = hit.collider.GetComponent<Boulder>();
+                if (boulder != null)
                 {
+                    Debug.Log("Boulder zosta³ trafiony przez Raycast!");
 
-                    // Sprawdzamy, czy to prefab lasu
-                    Forest forest = hit.collider.GetComponent<Forest>();
-            
-
-                    if (forest != null && player.balance >= forest.removalCost)
+                    float removalCost = boulder.GetBoulderRemovalCost(boulder.stage);
+                    if (player.balance >= removalCost)
                     {
-      
-                        GridManager.instance.ReleaseSpace(forest.coordinates);
-
-                        Destroy(forest.gameObject);
-
-                        Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                        Vector3 placementPosition = new Vector3(mouseWorldPosition.x, mouseWorldPosition.y, 0f);
-
-                        ShowFloatingText($"-{forest.removalCost}$", placementPosition);
-                        Debug.Log("Las zosta³ usuniêty!");
-
+                        player.pay(removalCost);
+                        boulder.decreaseStage();
+                        ShowFloatingText($"-{removalCost}$", mousePosition);
+                        Debug.Log($"Kamieñ obni¿ony do stage: {boulder.stage}");
                     }
-                    if (structure is Attraction attraction)
+                    else
                     {
-                        if (attraction.entrance != null)
-                        {
-                            GridManager.instance.ReleaseSpace(attraction.entrance.coordinates);
-                            Destroy(attraction.entrance.gameObject);
-                        }
-
-                        if (attraction.exit != null)
-                        {
-                            GridManager.instance.ReleaseSpace(attraction.exit.coordinates);
-                            Destroy(attraction.exit.gameObject);
-                        }
-
-                        player.attractionList.Remove(attraction);
-
+                        Debug.Log("Nie masz wystarczaj¹co pieniêdzy na usuniêcie kamienia!");
                     }
-                    if (!(structure is River river))
+                    return;
+                }
+
+                // Usuwanie lasów
+                Forest forest = hit.collider.GetComponent<Forest>();
+                if (forest != null && player.balance >= forest.removalCost)
+                {
+                    player.pay(forest.removalCost);
+                    GridManager.instance.ReleaseSpace(forest.coordinates);
+                    Destroy(forest.gameObject);
+                    ShowFloatingText($"-{forest.removalCost}$", mousePosition);
+                    Debug.Log("Las zosta³ usuniêty!");
+                    return;
+                }
+
+                // Usuwanie atrakcji
+                Structure structure = hit.collider.GetComponent<Structure>();
+                if (structure is Attraction attraction)
+                {
+                    if (attraction.entrance != null)
                     {
-                        GridManager.instance.ReleaseSpace(structure.coordinates);
-                        Destroy(structure.gameObject);
+                        GridManager.instance.ReleaseSpace(attraction.entrance.coordinates);
+                        Destroy(attraction.entrance.gameObject);
                     }
-                }   
+                    if (attraction.exit != null)
+                    {
+                        GridManager.instance.ReleaseSpace(attraction.exit.coordinates);
+                        Destroy(attraction.exit.gameObject);
+                    }
+                    player.attractionList.Remove(attraction);
+                }
 
-                 
-
-                Debug.Log("Atrakcja i powi¹zane obiekty zosta³y usuniête!");
-                                                 
+                // Usuwanie zwyk³ych struktur (nie rzek)
+                if (structure != null && !(structure is River))
+                {
+                    GridManager.instance.ReleaseSpace(structure.coordinates);
+                    Destroy(structure.gameObject);
+                    Debug.Log("Obiekt zosta³ usuniêty!");
+                }
             }
         }
     }
+
+
+    // Funkcja zwracaj¹ca koszt usuniêcia kamienia w zale¿noœci od stage
+
 
 
     private void ShowFloatingText(string text, Vector3 position)
