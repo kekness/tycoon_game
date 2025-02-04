@@ -108,7 +108,16 @@ public class Attraction : Structure
         yield return new WaitForSeconds(0.1f); // Krótkie opóŸnienie przed aktualizacj¹ kolejki
         updateQueue();
     }
+    public void newDay()
+    {
+        this.Visitors.Clear();
+        foreach (QueuePath quebonafide in queuePaths)
+            quebonafide.visitorsOnQueuePath.Clear();
+                
+        todaysVisitations = 0;
+        Awake();
 
+    }
     public void updateQueue()
     {
         bool movedVisitor;

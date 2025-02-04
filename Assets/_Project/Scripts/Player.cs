@@ -73,7 +73,7 @@ public class Player : BaseManager<Player>
         DayNumber++;
         foreach(Attraction atr in attractionList)
         {
-            atr.todaysVisitations = 0;
+            atr.newDay();
         }
     }
 }
