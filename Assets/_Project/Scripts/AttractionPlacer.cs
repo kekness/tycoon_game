@@ -165,10 +165,7 @@ public class AttractionPlacer : BaseManager<GridManager>
         if (index >= 0 && index < attractionPrefabs.Count)
         {
             selectedAttractionPrefab = attractionPrefabs[index];
-
-        
-            currentStructure = selectedAttractionPrefab.GetComponent<Structure>();//Tutaj próbowa³em robic odnosnie przenoszenia duszków do UIManagera
-
+            currentStructure = selectedAttractionPrefab.GetComponent<Structure>();
         }
     }
 
@@ -177,7 +174,12 @@ public class AttractionPlacer : BaseManager<GridManager>
     {
         Structure structure = selectedAttractionPrefab.GetComponent<Structure>();
 
-        // Pobierz aktualn¹ pozycjê siatki z GridManager
+        if (structure is QueuePath)
+        {
+            TryPlaceQueuePath();
+            return;
+        }
+
         Vector2Int gridPosition = GridManager.instance.GetCurrentGridPosition();
 
         if (GridManager.instance.IsSpaceAvailable(gridPosition, structure.size))
@@ -200,17 +202,14 @@ public class AttractionPlacer : BaseManager<GridManager>
                 ShowFloatingText($"-{structure.cost}$", placementPosition);
 
                 PathManager.instance.DisplayGridPath();
-       
+
                 if (placedStructure is Attraction attraction)
                 {
                     player.attractionList.Add(attraction);
                     lastPlacedAttraction = attraction;
                     isPlacingEntrance = true;
                 }
-                else
-                {
-                    Debug.Log("Budynek nie jest atrakcj¹, nie wymaga wejœcia i wyjœcia.");
-                }
+
             }
             else
             {
@@ -219,7 +218,7 @@ public class AttractionPlacer : BaseManager<GridManager>
         }
         else
         {
-            // SprawdŸ, czy na danym polu znajduje siê rzeka
+            // Sprawdy, czy na danym polu znajduje sie rzeka
             River river = GridManager.instance.GetStructureAt<River>(gridPosition);
 
             if (structure is Path && river != null && !river.isBridged)
@@ -235,12 +234,85 @@ public class AttractionPlacer : BaseManager<GridManager>
 
                 ShowFloatingText($"-{bridge.cost}$", placementPosition);
 
-                Debug.Log("Most zosta³ postawiony!");
+                Debug.Log("Most zostal postawiony!");
                 river.isBridged = true;
                 return;
             }
         }
     }
+
+    private void TryPlaceQueuePath()
+    {
+        Vector2Int gridPosition = GridManager.instance.GetCurrentGridPosition();
+
+        if (!GridManager.instance.IsSpaceAvailable(gridPosition, new Vector2Int(1, 1)))
+        {
+            Debug.Log("Nie mo¿na umieœciæ kolejki tutaj!");
+            return;
+        }
+
+        Vector3Int cellPosition = new Vector3Int(gridPosition.x, gridPosition.y, 0);
+        Vector3 placementPosition = tilemap.GetCellCenterWorld(cellPosition);
+
+        GameObject queueObject = Instantiate(selectedAttractionPrefab, placementPosition, Quaternion.identity);
+        QueuePath queuePath = queueObject.GetComponent<QueuePath>();
+        queuePath.coordinates = new List<Vector2Int> { gridPosition };
+
+        GridManager.instance.OccupySpace(gridPosition, new Vector2Int(1, 1));
+        player.pay(queuePath.cost);
+
+        ShowFloatingText($"-{queuePath.cost}$", placementPosition);
+
+        Attraction nearbyAttraction = FindNearbyAttraction(gridPosition);
+        if (nearbyAttraction != null)
+        {
+            nearbyAttraction.AddQueuePath(queuePath);
+            queuePath.hostAttraction = nearbyAttraction;
+            Debug.Log("Dodano pierwszy segment kolejki do atrakcji!");
+            return;
+        }
+
+        QueuePath nearbyQueue = FindNearbyQueue(gridPosition, queuePath);
+        if (nearbyQueue != null)
+        {
+            nearbyQueue.nextQueuePath = queuePath;
+            queuePath.hostAttraction = nearbyQueue.hostAttraction;
+            nearbyQueue.hostAttraction.AddQueuePath(queuePath);
+
+            Debug.Log("Dodano segment do istniej¹cej kolejki!");
+        }
+    }
+
+    private Attraction FindNearbyAttraction(Vector2Int position)
+    {
+        foreach (var attraction in player.attractionList)
+        {
+            if (Vector2Int.Distance(attraction.entrance.coordinates[0], position) == 1)
+            {
+                return attraction;
+            }
+        }
+        return null;
+    }
+
+    private QueuePath FindNearbyQueue(Vector2Int position, QueuePath self)
+    {
+        Vector3 worldPosition = tilemap.GetCellCenterWorld(new Vector3Int(position.x, position.y, 0));
+
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(worldPosition, 1f);
+        foreach (var collider in colliders)
+        {
+            QueuePath queuePath = collider.GetComponent<QueuePath>();
+
+            // Sprawdzenie, czy znaleziony obiekt to nie ten sam, który wywo³uje funkcjê
+            if (queuePath != null && queuePath != self)
+            {
+                return queuePath;
+            }
+        }
+        return null;
+    }
+
 
     private List<Vector2Int> CalculateCoordinates(Vector2Int startPosition, Vector2Int size)
     {
@@ -364,6 +436,7 @@ public class AttractionPlacer : BaseManager<GridManager>
     #region buttons
     // Buttony dla atrakcji
     public void SelectPathTile() { SelectAttraction(0); }
+    public void SelectQueueTile() { SelectAttraction(5); }
     public void SelectAttraction1Tile() { SelectAttraction(1); }
     public void SelectAttraction2Tile() { SelectAttraction(2); }
     public void SelectAttraction3Tile() { SelectAttraction(3); }

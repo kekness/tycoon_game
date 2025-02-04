@@ -28,6 +28,7 @@ public class Boulder : Obstacle
         stage--;
         if (stage == 0)
         {
+            GridManager.instance.ReleaseSpace(coordinates);
             Destroy(gameObject);
             return;
         }

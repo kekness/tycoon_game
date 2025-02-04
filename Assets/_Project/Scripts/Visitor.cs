@@ -13,20 +13,25 @@ public class Visitor : MonoBehaviour
 
     private bool isLeaving = false;
     public Tilemap tilemap;
-    float gameTime;
+    private float gameTime;
     public float speed;
-    private Queue<Vector3> pathPoints = new Queue<Vector3>();
+    private Queue<Vector2Int> pathPoints = new Queue<Vector2Int>();
     private bool isMoving;
     private Attraction currentAttraction;
+    private QueuePath currentQueuePosition;
     private float lastRecordedTime = 0f;
+    private bool isActive = true;
+
     private void Awake()
-    {
+    { 
         tilemap = AttractionPlacer.instance?.tilemap;
     }
 
     private void Start()
     {
-        MoveToRandomAttraction();
+        ChooseRandomAttraction();
+        currentAttraction.queuePaths[0].EnqueueVisitor(this);
+        Deactivate();
     }
 
     private void Update()
@@ -40,7 +45,6 @@ public class Visitor : MonoBehaviour
             lastRecordedTime = gameTime;
         }
 
-        // Sprawdzenie, czy jest godzina 22:00 lub póŸniej
         if (gameTime / 3600f >= 22f)
         {
             Destroy(gameObject);
@@ -63,28 +67,24 @@ public class Visitor : MonoBehaviour
         return new Vector2Int(cellPosition.x, cellPosition.y);
     }
 
-    public void MoveToRandomAttraction()
-    {
-        currentAttraction = Player.instance.GetRandomAttraction();
-        if (currentAttraction != null)
-        {
-            Vector2Int target = currentAttraction.entrance.coordinates[0];
-            MoveNPC(GetCurrentGridPosition(), target);
-        }
-        else
-        {
-            Debug.LogError("Brak atrakcji w grze!");
-        }
-    }
     private void RecordCurrentPosition()
     {
         Vector2Int currentGridPosition = GetCurrentGridPosition();
+        HeatMapManager.instance.RecordData(currentGridPosition);
+    }
 
-            HeatMapManager.instance.RecordData(currentGridPosition);
-            Debug.Log($"Visitor recorded position: {currentGridPosition}");
+    public void ChooseRandomAttraction()
+    {
+        if (isLeaving) return;
+
+        currentAttraction = Player.instance.GetRandomAttraction();
 
     }
 
+
+    
+
+ 
     public void MoveNPC(Vector2Int start, Vector2Int target)
     {
         Pathfinding pathfinding = new Pathfinding();
@@ -93,84 +93,64 @@ public class Visitor : MonoBehaviour
         {
             SetPath(path);
         }
-        else
+    }
+
+    public void SetPath(List<Vector2Int> path)
+    {
+        StopCurrentPath(); // Przerwij obecn¹ œcie¿kê
+        pathPoints.Clear();
+        foreach (var tilePosition in path)
         {
-            Debug.LogError("No path found to target!");
+            pathPoints.Enqueue(tilePosition);
         }
+        if (pathPoints.Count > 0) MoveToNextPoint();
+    }
+    private void MoveToNextPoint()
+    {
+        if (pathPoints.Count > 0)
+        {
+            Vector2Int nextPoint = pathPoints.Dequeue();
+            StartCoroutine(MoveToPosition(nextPoint));
+        }
+    }
+
+    private IEnumerator MoveToPosition(Vector2Int targetPosition)
+    {
+        isMoving = true;
+        Vector3 worldTarget = tilemap.GetCellCenterWorld(new Vector3Int(targetPosition.x, targetPosition.y, 0));
+
+        while (Vector3.Distance(transform.position, worldTarget) > 0.1f)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, worldTarget, speed * Time.deltaTime);
+            yield return null;
+        }
+        isMoving = false;
+
+        MoveToNextPoint();
+    }
+    public void StopCurrentPath()
+    {
+        StopAllCoroutines(); // Zatrzymaj wszystkie coroutines (w tym MoveToPosition)
+        pathPoints.Clear();  // Wyczyœæ kolejkê œcie¿ki
+        isMoving = false;    // Zresetuj flagê isMoving
+    }
+    public void MoveToExit()
+    {
+        isLeaving = true;
+        Vector2Int exitPosition = Player.instance.gate.coordinates[0];
+        MoveNPC(GetCurrentGridPosition(), exitPosition);
+    }
+    public void Activate()
+    {
+        this.isActive = true;
+        Start();
+    }
+    public void Deactivate()
+    {
+        this.isActive = false;
     }
     public void Pay(float money)
     {
         Player.instance.getMoney(money);
     }
-    public void SetPath(List<Vector2Int> path)
-    {
-        pathPoints.Clear();
-        foreach (var tilePosition in path)
-        {
-            Vector3 worldPosition = tilemap.GetCellCenterWorld(new Vector3Int(tilePosition.x, tilePosition.y, 0));
-            pathPoints.Enqueue(worldPosition);
-        }
-        if (pathPoints.Count > 0) MoveToNextPoint();
-    }
-
-    private void MoveToNextPoint()
-    {
-        if (pathPoints.Count > 0)
-        {
-            Vector3 nextPoint = pathPoints.Dequeue();
-            StartCoroutine(MoveToPosition(nextPoint));
-        }
-    }
-
-    private IEnumerator MoveToPosition(Vector3 targetPosition)
-    {
-        isMoving = true;
-        while (Vector3.Distance(transform.position, targetPosition) > 0.1f)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime);
-            yield return null;
-        }
-        isMoving = false;
-
-        if (isLeaving && Player.instance.gate != null && GetCurrentGridPosition() == Player.instance.gate.coordinates[0])
-        {
-            Destroy(gameObject);
-            yield break;
-        }
-
-        if (currentAttraction != null && GetCurrentGridPosition() == currentAttraction.entrance.coordinates[0])
-        {
-            StartCoroutine(VisitAttraction());
-        }
-        else
-        {
-            MoveToNextPoint();
-        }
-    }
-
-
-
-    private IEnumerator VisitAttraction()
-    {
-        Debug.Log("Visitor is enjoying the attraction...");
-
-        float targetGameTime = ClockUI.instance.GetGameTime() + (currentAttraction.timeRequired * 60f);
-        currentAttraction.visit();
-        Pay(currentAttraction.ticketCost);
-        while (ClockUI.instance.GetGameTime() < targetGameTime)
-        {
-            yield return null; // Czekamy do momentu, a¿ gra osi¹gnie docelowy czas
-        }
-
-        // Po zakoñczeniu atrakcji teleportujemy do wyjœcia
-        transform.position = tilemap.GetCellCenterWorld(new Vector3Int(
-            currentAttraction.exit.coordinates[0].x,
-            currentAttraction.exit.coordinates[0].y,
-            0
-        ));
-
-        MoveToRandomAttraction(); // Wybieramy now¹ atrakcjê
-    }
-
-
 }
