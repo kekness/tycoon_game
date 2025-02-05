@@ -76,8 +76,12 @@ public class Visitor : MonoBehaviour
     public void ChooseRandomAttraction()
     {
         if (isLeaving) return;
+        if (Player.instance.isAllClosed())
+            Destroy(gameObject);
 
-        currentAttraction = Player.instance.GetRandomAttraction();
+        do
+            currentAttraction = Player.instance.GetRandomAttraction();
+        while (!currentAttraction.isOpen);
 
     }
 

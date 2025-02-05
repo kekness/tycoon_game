@@ -76,4 +76,11 @@ public class Player : BaseManager<Player>
             atr.newDay();
         }
     }
+    public bool isAllClosed()
+    {
+        foreach (Attraction atr in attractionList)
+            if (atr.isOpen == true)
+                return false;
+        return true;
+    }
 }

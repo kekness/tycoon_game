@@ -5,22 +5,28 @@ using UnityEngine.Tilemaps;
 
 public class Attraction : Structure
 {
-    public bool isOpen = true;
+    public bool isBroken = false;
+    public bool isOpen = false;
     public bool isRunning = false; // Czy atrakcja jest w trakcie biegu?
     public int ticketCost = 10;
     public int todaysVisitations = 0;
+
     public ExitEntry entrance;
     public ExitEntry exit;
     public float timeRequired; // Czas trwania biegu w minutach gry
     public Sprite attractionSprite;
     public int VisitorCapacity = 5;
     public Tilemap tilemap;
+    public int failureChance = 0; // Szansa na awariê (max 25%)
+    private int maxFailureChance = 50;
 
     public List<Visitor> Visitors = new List<Visitor>(); // Lista Visitorów, którzy korzystaj¹ z atrakcji
     public List<QueuePath> queuePaths = new List<QueuePath>(); // Kolejki do atrakcji
 
     private void Awake()
     {
+        isBroken = false;
+        isOpen = false;
         tilemap = AttractionPlacer.instance?.tilemap;
         Debug.Log($"[Attraction] Start uruchomione dla {gameObject.name}");
         StartCoroutine(AttractionLoop());
@@ -78,9 +84,34 @@ public class Attraction : Structure
         StartCoroutine(DelayedUpdateQueue());
     }
 
+    public void BreakDown()
+    {
+        isBroken = true;
+        isOpen = false;
+
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color=Color.blue;
+            Debug.Log($"{gameObject.name} zmieni³ kolor na szary (awaria)!");
+        }
+        else
+        {
+            Debug.LogError($"Brak SpriteRenderer w {gameObject.name}, kolor nie mo¿e zostaæ zmieniony!");
+        }
+    }
+
     public void visit()
     {
         todaysVisitations++;
+        failureChance = System.Math.Min(failureChance + 1, maxFailureChance); // Rosn¹ca szansa na awariê (max 25%)
+        if (Random.Range(0, 200) <= failureChance)
+        {
+            BreakDown();
+            Debug.LogError("BALLLLLLLLLLLLLLLLLLLLLLLLLSSSSS");
+        }
+           
+        Debug.Log("NIGGABALLS");
     }
 
     public void AddQueuePath(QueuePath newQueuePath)
@@ -113,9 +144,9 @@ public class Attraction : Structure
         this.Visitors.Clear();
         foreach (QueuePath quebonafide in queuePaths)
             quebonafide.visitorsOnQueuePath.Clear();
-                
+
         todaysVisitations = 0;
-        Awake();
+
 
     }
     public void updateQueue()
@@ -141,5 +172,17 @@ public class Attraction : Structure
         }
         while (movedVisitor); // Kontynuuj dopóki ktoœ siê przesuwa
     }
-
+    public void PerformMaintenance()
+    {
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = Color.white;
+        }
+        failureChance = 0;
+            isOpen = true;
+            Debug.Log($"{gameObject.name} przesz³o konserwacjê i jest ponownie otwarte!");
+        
+    
+    }
 }
