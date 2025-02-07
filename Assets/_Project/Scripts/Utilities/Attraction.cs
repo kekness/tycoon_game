@@ -108,10 +108,10 @@ public class Attraction : Structure
         if (Random.Range(0, 200) <= failureChance)
         {
             BreakDown();
-            Debug.LogError("BALLLLLLLLLLLLLLLLLLLLLLLLLSSSSS");
+
         }
            
-        Debug.Log("NIGGABALLS");
+
     }
 
     public void AddQueuePath(QueuePath newQueuePath)

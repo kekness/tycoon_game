@@ -446,5 +446,6 @@ public class AttractionPlacer : BaseManager<GridManager>
     {
         inspectorMode = !inspectorMode;
     }
+    public void selectFoodStand() { SelectAttraction(6); }
     #endregion
 }

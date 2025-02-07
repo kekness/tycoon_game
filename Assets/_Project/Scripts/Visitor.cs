@@ -5,11 +5,11 @@ using UnityEngine.Tilemaps;
 
 public class Visitor : MonoBehaviour
 {
-    public int hunger;
-    public int thirst;
-    public int happiness;
-    public int disgust;
-    public int fear;
+    public int hunger=0;
+    public int thirst=0;
+    public int happiness=50;
+    public int disgust=0;
+    public int fear=0;
 
     private bool isLeaving = false;
     public Tilemap tilemap;
@@ -156,5 +156,9 @@ public class Visitor : MonoBehaviour
     public void Pay(float money)
     {
         Player.instance.getMoney(money);
+    }
+    public void eat(int food)
+    {
+      hunger=Mathf.Max(hunger -= food,0);
     }
 }
