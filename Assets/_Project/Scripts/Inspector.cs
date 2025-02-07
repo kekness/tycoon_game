@@ -8,9 +8,9 @@ public class Inspector : PopUpWindow
     public TextMeshProUGUI visitationsCount;
     public InputField ticketCostInput;
     public Image attractionImage;
-    public Toggle isOpenToggle; // Publiczny Toggle przypisany w edytorze
+    public Toggle isOpenToggle;
     public Button repairButton;
-
+    public Button mainenaceButton;
     private Attraction selectedAttraction;
     private System.Action onCloseCallback;
 
@@ -21,7 +21,6 @@ public class Inspector : PopUpWindow
         visitationsCount.text = $"Dzisiaj odwiedzono {attraction.todaysVisitations} razy";
         ticketCostInput.text = attraction.ticketCost.ToString();
 
-        // Ustawienie wartoœci Toggle na podstawie stanu atrakcji
         if (isOpenToggle != null)
         {
             if (attraction.isBroken == false)
@@ -42,16 +41,13 @@ public class Inspector : PopUpWindow
             Debug.LogError("Toggle isOpenToggle is not assigned in the Inspector!");
         }
 
-        // Ustawienie sprite'a atrakcji w komponencie Image
         if (attractionImage != null && attraction.attractionSprite != null)
         {
             attractionImage.sprite = attraction.attractionSprite;
-
-            // Powiêkszenie sprite'a
             RectTransform imageRectTransform = attractionImage.GetComponent<RectTransform>();
             if (imageRectTransform != null)
             {
-                imageRectTransform.localScale = new Vector3(1.5f, 1.5f, 1f); // Powiêkszenie o 50%
+                imageRectTransform.localScale = new Vector3(1.5f, 1.5f, 1f);
             }
             else
             {
@@ -63,10 +59,16 @@ public class Inspector : PopUpWindow
             Debug.LogError("Attraction Image or Sprite is not assigned!");
         }
 
-        // Ustawienie widocznoœci przycisku naprawy
         if (repairButton != null)
         {
+            mainenaceButton.gameObject.SetActive(!attraction.isBroken);
             repairButton.gameObject.SetActive(attraction.isBroken);
+        }
+
+        if (mainenaceButton != null)
+        {
+            repairButton.gameObject.SetActive(attraction.isBroken);
+            mainenaceButton.gameObject.SetActive(!attraction.isBroken);
         }
 
         onCloseCallback = onClose;
@@ -78,13 +80,15 @@ public class Inspector : PopUpWindow
         {
             visitationsCount.text = $"Dzisiaj odwiedzono {selectedAttraction.todaysVisitations} razy";
 
-            // Aktualizacja widocznoœci przycisku naprawy w czasie rzeczywistym
             if (repairButton != null)
             {
+                bool isBroken = selectedAttraction.isBroken;
+                mainenaceButton.gameObject.SetActive(!selectedAttraction.isBroken);
                 repairButton.gameObject.SetActive(selectedAttraction.isBroken);
             }
         }
     }
+
     public void UpdateTicketCost()
     {
         if (selectedAttraction != null && int.TryParse(ticketCostInput.text, out int newCost))
@@ -92,7 +96,6 @@ public class Inspector : PopUpWindow
             selectedAttraction.ticketCost = newCost;
         }
 
-        // Aktualizacja stanu otwarcia/zamkniêcia atrakcji
         if (isOpenToggle != null)
         {
             selectedAttraction.isOpen = isOpenToggle.isOn;
@@ -100,6 +103,7 @@ public class Inspector : PopUpWindow
 
         CloseWindow();
     }
+
     public void repair()
     {
         if (Player.instance.balance >= 500)
@@ -107,12 +111,29 @@ public class Inspector : PopUpWindow
             Player.instance.balance -= 500;
             selectedAttraction.PerformMaintenance();
 
-            // Po naprawie ukryj przycisk
             if (repairButton != null)
             {
                 repairButton.gameObject.SetActive(false);
             }
+
+            if (mainenaceButton != null)
+            {
+                mainenaceButton.gameObject.SetActive(true);
+            }
         }
     }
 
+    public void mainenance()
+    {
+        if (Player.instance.balance >= 100)
+        {
+            Player.instance.balance -= 100;
+            selectedAttraction.PerformMaintenance();
+
+            if (mainenaceButton != null)
+            {
+                mainenaceButton.gameObject.SetActive(false);
+            }
+        }
+    }
 }

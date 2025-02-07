@@ -181,6 +181,7 @@ public class Attraction : Structure
         }
         failureChance = 0;
             isOpen = true;
+        isBroken = false;
             Debug.Log($"{gameObject.name} przesz³o konserwacjê i jest ponownie otwarte!");
         
     
