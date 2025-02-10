@@ -56,6 +56,9 @@ TagManager:
   - name: Attractions_Forests
     uniqueID: 288793727
     locked: 0
+  - name: Fire
+    uniqueID: 3756998131
+    locked: 0
   - name: UI
     uniqueID: 3041393339
     locked: 0

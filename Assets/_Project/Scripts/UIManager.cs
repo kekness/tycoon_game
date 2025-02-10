@@ -6,18 +6,58 @@ using UnityEngine.Tilemaps;
 
 public class UIManager : BaseManager<UIManager>
 {
+    [Header("UI Elements")]
     public GameObject inspectorPrefab; // Prefab dla okna inspektora
     public GameObject daySummaryPrefab; // Prefab dla okna podsumowania dnia
     public Transform parentCanvas; // Rodzic dla okien UI
-    GameObject ghostObject;
-    SpriteRenderer ghostRenderer = new SpriteRenderer();
+
+    [Header("Shop System")]
+    public GameObject shopPrefab; // Prefab sklepu
+    private ShopManager shopInstance; // Referencja do instancji sk
+    public List<GameObject> availableShopItems = new List<GameObject>();
+
+    private GameObject ghostObject; // "Duch" dla podgl¹du obiektów
+    private SpriteRenderer ghostRenderer;
 
     public void Awake()
     {
+
         base.InitializeManager();
     }
 
-    // Metoda do wyœwietlania okna inspektora
+
+
+    public void ToggleShop()
+    {
+        AttractionPlacer.instance.inspectorMode = false;
+        AttractionPlacer.instance.deleteMode = false;
+        if (shopInstance == null)
+        {
+            GameObject shopObject = Instantiate(shopPrefab, parentCanvas);
+            shopInstance = shopObject.GetComponent<ShopManager>();
+
+            if (shopInstance == null)
+            {
+                Debug.LogError("ShopManager nie znaleziony w shopPrefab!");
+                return;
+            }
+        }
+
+        // Pobieramy listê dostêpnych atrakcji i przekazujemy do sklepu
+        AttractionPlacer attractionPlacer = FindObjectOfType<AttractionPlacer>();
+        if (attractionPlacer == null)
+        {
+            Debug.LogError("AttractionPlacer nie znaleziony w scenie!");
+            return;
+        }
+
+        shopInstance.PopulateShop();
+     
+    }
+
+
+
+
     public void ShowInspector(Attraction attraction)
     {
         if (inspectorPrefab == null)
@@ -35,13 +75,12 @@ public class UIManager : BaseManager<UIManager>
             return;
         }
 
-        // Ustawienie danych atrakcji w inspektorze
         inspector.SetupInspector(attraction, () => {
             Debug.Log("Inspector closed.");
         });
     }
 
-    // Metoda do wyœwietlania okna podsumowania dnia
+
     public void ShowDaySummary()
     {
         if (daySummaryPrefab == null)
@@ -56,7 +95,6 @@ public class UIManager : BaseManager<UIManager>
             return;
         }
 
-        // Tworzymy nowe okno podsumowania dnia
         GameObject newDaySummary = Instantiate(daySummaryPrefab, parentCanvas);
         DaySummary daySummary = newDaySummary.GetComponent<DaySummary>();
 
@@ -66,11 +104,10 @@ public class UIManager : BaseManager<UIManager>
             return;
         }
 
-        // Ustawienie danych w podsumowaniu dnia
         daySummary.SetupDaySummary();
     }
 
-    // Metoda do aktualizacji "ducha" struktury (np. podczas budowania)
+
     public void UpdateGhostStructure(Structure structure, bool isAvailable)
     {
         if (ghostObject == null)

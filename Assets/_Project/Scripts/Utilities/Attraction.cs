@@ -10,6 +10,8 @@ public class Attraction : Structure
     public bool isRunning = false; // Czy atrakcja jest w trakcie biegu?
     public int ticketCost = 10;
     public int todaysVisitations = 0;
+    public GameObject fireInstance; // Przechowuje obiekt ognia, jeœli atrakcja p³onie
+
 
     public ExitEntry entrance;
     public ExitEntry exit;

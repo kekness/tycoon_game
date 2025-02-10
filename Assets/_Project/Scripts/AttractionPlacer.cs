@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using TMPro;
 
-public class AttractionPlacer : BaseManager<GridManager>
+public class AttractionPlacer : BaseManager<AttractionPlacer>
 {
 
     public Tilemap tilemap;
@@ -13,7 +13,7 @@ public class AttractionPlacer : BaseManager<GridManager>
     public Vector2Int currentGridPosition;
     public Player player;
     public GameObject floatingTextPrefab;
-    private bool deleteMode = false, inspectorMode = false;
+    public bool deleteMode = false, inspectorMode = false, buildingMode = false;
     private Attraction lastPlacedAttraction;
     private bool isPlacingEntrance = false;
     private bool isPlacingExit = false;
@@ -33,7 +33,7 @@ public class AttractionPlacer : BaseManager<GridManager>
     {
         if (attractionPrefabs.Count > 0)
         {
-            SelectAttraction(0); // Domyœlnie wybierz pierwsz¹ atrakcjê
+            InspectorMode();
         }
     }
 
@@ -160,15 +160,21 @@ public class AttractionPlacer : BaseManager<GridManager>
     }
 
 
-    private void SelectAttraction(int index)
+    public void SelectAttraction(int index)
     {
-        if (index >= 0 && index < attractionPrefabs.Count)
-        {
-            selectedAttractionPrefab = attractionPrefabs[index];
-            currentStructure = selectedAttractionPrefab.GetComponent<Structure>();
-        }
-    }
 
+        // Sprawdzenie poprawnoœci indeksu
+        if (index < 0 || index >= UIManager.instance.availableShopItems.Count)
+        {
+            Debug.LogError($"Podano nieprawid³owy indeks atrakcji! Index: {index}, Max: {UIManager.instance.availableShopItems.Count - 1}");
+            return;
+        }
+        selectedAttractionPrefab = UIManager.instance.availableShopItems[index];
+
+        currentStructure = selectedAttractionPrefab.GetComponent<Structure>();
+
+        Debug.Log($"Wybrano atrakcjê: {currentStructure.structureName}, koszt: {currentStructure.cost}$");
+    }
 
     private void TryPlaceBuilding()
     {
@@ -434,18 +440,16 @@ public class AttractionPlacer : BaseManager<GridManager>
 
 
     #region buttons
-    // Buttony dla atrakcji
-    public void SelectPathTile() { SelectAttraction(0); }
-    public void SelectQueueTile() { SelectAttraction(5); }
-    public void SelectAttraction1Tile() { SelectAttraction(1); }
-    public void SelectAttraction2Tile() { SelectAttraction(2); }
-    public void SelectAttraction3Tile() { SelectAttraction(3); }
-    public void SelectGate() { SelectAttraction(4); }
-    public void RemoveObject() { deleteMode = !deleteMode; }
+    public void RemoveObject() { 
+        deleteMode = !deleteMode;
+        if (inspectorMode)
+            inspectorMode = false;
+                }
     public void InspectorMode()
     {
         inspectorMode = !inspectorMode;
+        if (deleteMode)
+            deleteMode = false;
     }
-    public void selectFoodStand() { SelectAttraction(6); }
     #endregion
 }
