@@ -3,12 +3,13 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Visitor
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Visitors
   - Water
   - UI
   - 
@@ -61,4 +62,7 @@ TagManager:
     locked: 0
   - name: UI
     uniqueID: 3041393339
+    locked: 0
+  - name: Visitor
+    uniqueID: 1724330875
     locked: 0

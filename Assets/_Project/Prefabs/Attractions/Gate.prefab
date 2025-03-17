@@ -102,4 +102,5 @@ MonoBehaviour:
   sprite: {fileID: 0}
   visitorPrefab: {fileID: 7472694012220629480, guid: 2bd3410d957b74a45968feddd143345f, type: 3}
   spawnInterval: 5
-  maxVisitors: 1
+  maxVisitors: 2
+  currentVisitors: 0

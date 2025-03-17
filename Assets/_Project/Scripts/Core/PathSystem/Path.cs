@@ -16,7 +16,11 @@ public class Path : Structure
     }
     private void OnDestroy()
     {
-        PathManager.instance.unRegisterPath(coordinates[0]);
+        // Dodaj warunek sprawdzaj¹cy czy manager jeszcze istnieje
+        if (PathManager.instance != null)
+        {
+            PathManager.instance.unRegisterPath(coordinates[0]);
+        }
     }
 
 }

@@ -7,12 +7,13 @@ public class Player : BaseManager<Player>
 {
     public int numberOfVisitors = 0;
     public int DayNumber = 1;
-    public float balance = 9999999;
+    public float balance = 99999999999;
     public float todaysEarnings = 0;
     public float todaysExpenses=0;
     public TextMeshProUGUI balanceText;
     public List<Attraction> attractionList = new List<Attraction>();
-    public Gate gate;
+    public List<Shop> shopList = new List<Shop>();
+    public List<Gate> gates;
     public void Awake()
     {
         base.InitializeManager();
@@ -34,7 +35,25 @@ public class Player : BaseManager<Player>
         }
         return attractionList[Random.Range(0, attractionList.Count)]; // Losowy wybór atrakcji
     }
-   public void pay(float money)
+
+    public Shop GetRandomShop()
+    {
+        if (attractionList.Count == 0)
+        {
+            return null; // Nie ma atrakcji w grze
+        }
+        return shopList[Random.Range(0, attractionList.Count)]; // Losowy wybór atrakcji
+    }
+
+    public Gate GetRandomExit()
+    {
+        if (gates.Count == 0)
+        {
+            return null; // Nie ma atrakcji w grze
+        }
+        return gates[Random.Range(0, attractionList.Count)]; // Losowy wybór atrakcji
+    }
+    public void pay(float money)
     {
         balance -=money;
         todaysExpenses +=money;
@@ -74,6 +93,11 @@ public class Player : BaseManager<Player>
         foreach(Attraction atr in attractionList)
         {
             atr.newDay();
+        }
+
+        foreach(Gate gate in gates)
+        {
+            gate.newDay();
         }
     }
     public bool isAllClosed()

@@ -8,6 +8,15 @@ public class QueuePath : Path
     public QueuePath nextQueuePath;
     public Attraction hostAttraction;
 
+
+    public void RemoveVisitor(Visitor visitor)
+    {
+        if (visitorsOnQueuePath.Contains(visitor))
+        {
+            visitorsOnQueuePath.Remove(visitor);
+        }
+    }
+
     public QueuePath(string name, int baseCost) : base(name, baseCost)
     {
         visitorsOnQueuePath = new List<Visitor>(); // Inicjalizacja listy
@@ -35,6 +44,7 @@ public class QueuePath : Path
 
     public void EnqueueVisitor(Visitor visitor)
     {
+
         if (hostAttraction == null)
         {
             Debug.LogWarning($"[QueuePath] Kolejka {this.name} NIE MA przypisanej atrakcji!");

@@ -11,9 +11,10 @@ GameObject:
   - component: {fileID: 7472694012220629494}
   - component: {fileID: 7472694012220629495}
   - component: {fileID: 7349584793013849647}
-  m_Layer: 0
+  - component: {fileID: -8604812775635233206}
+  m_Layer: 3
   m_Name: Visitor
-  m_TagString: Untagged
+  m_TagString: Visitor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -27,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 7472694012220629480}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 209.81822, y: 171.47119, z: -118.47869}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -95,9 +96,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a44ada24371ae9449c9478c44faf1eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 2
-  hunger: 0
-  thirst: 0
-  happiness: 0
-  disgust: 0
-  fear: 0
+  separation: 0.4
+  alignment: 0.1
+  cohesion: 0.2
+  maxSpeed: 1.5
+  maxForce: 1
+  neighbors: []
+  neighborRadius: 1.5
+  fovAngle: 120
+  fovDistance: 5
+  money: 0
+  gunger: 60
+  gameTime: 0
+  rb: {fileID: 0}
+  favoriteAttraction: {fileID: 0}
+  targetAttraction: {fileID: 0}
+  currentState: 0
+--- !u!50 &-8604812775635233206
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7472694012220629480}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0

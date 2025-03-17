@@ -5,6 +5,13 @@ using UnityEngine.Tilemaps;
 
 public class Attraction : Structure
 {
+
+    [Header("Satisfaction Settings")]
+    public int satisfaction = 0;                // Aktualny poziom satysfakcji
+    public int maxSatisfaction = 100;           // Maksymalny poziom satysfakcji
+    public int satisfactionPerVisitor = 2;      // Punkty satysfakcji za jednego odwiedzaj¹cego
+    public int breakdownPenalty = 30;
+
     public bool isBroken = false;
     public bool isOpen = false;
     public bool isRunning = false; // Czy atrakcja jest w trakcie biegu?
@@ -24,6 +31,8 @@ public class Attraction : Structure
 
     public List<Visitor> Visitors = new List<Visitor>(); // Lista Visitorów, którzy korzystaj¹ z atrakcji
     public List<QueuePath> queuePaths = new List<QueuePath>(); // Kolejki do atrakcji
+
+    public int visitorsInQueue = 0;
 
     private void Awake()
     {
@@ -48,6 +57,8 @@ public class Attraction : Structure
                     UnloadVisitors();
                     isRunning = false;
                     Debug.Log("czas biegu atrakcji skoñczy³ siê");
+
+                    AddSatisfaction(Visitors.Count * satisfactionPerVisitor);
                 }
             }
             updateQueue(); // Regularna aktualizacja kolejki
@@ -67,20 +78,26 @@ public class Attraction : Structure
                 Visitors.Add(visitor);
                 visit();
                 visitor.Pay(ticketCost);
-                visitor.MoveNPC(visitor.GetCurrentGridPosition(), entrance.coordinates[0]);
-                visitor.Deactivate(); // Deaktywuj Visitora na czas trwania biegu
+/*                visitor.MoveNPC(visitor.GetCurrentGridPosition(), entrance.coordinates[0]);
+                visitor.Deactivate(); // Deaktywuj Visitora na czas trwania biegu*/
             }
         }
-   
+
     }
 
     private void UnloadVisitors()
     {
         foreach (Visitor visitor in Visitors)
         {
+            if (visitor == null)
+            {
+                this.isRunning = false;                
+                continue;
+            }
+                
             visitor.transform.position = tilemap.GetCellCenterWorld(new Vector3Int(
                        exit.coordinates[0].x, exit.coordinates[0].y, 0));
-            visitor.Activate(); // Aktywuj Visitora po zakoñczeniu biegu
+            visitor.currentState = VisitorStates.BOIDS;
         }
         Visitors.Clear();
         StartCoroutine(DelayedUpdateQueue());
@@ -90,6 +107,8 @@ public class Attraction : Structure
     {
         isBroken = true;
         isOpen = false;
+
+        satisfaction = Mathf.Max(satisfaction - breakdownPenalty, 0);
 
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null)
@@ -110,10 +129,13 @@ public class Attraction : Structure
         if (Random.Range(0, 200) <= failureChance)
         {
             BreakDown();
-
         }
-           
+    }
 
+    public void visit(Visitor visitor)
+    {
+        visitor.currentState = VisitorStates.IDLE;
+        queuePaths[0].EnqueueVisitor(visitor);
     }
 
     public void AddQueuePath(QueuePath newQueuePath)
@@ -160,19 +182,33 @@ public class Attraction : Structure
             for (int i = queuePaths.Count - 1; i > 0; i--) // Iteracja od koñca do pocz¹tku
             {
                 List<Visitor> visitorsToMove = new List<Visitor>(queuePaths[i].visitorsOnQueuePath); // Kopia listy, by unikn¹æ modyfikacji w pêtli
+                visitorsInQueue = queuePaths[i].visitorsOnQueuePath.Count;
                 foreach (Visitor visitor in visitorsToMove)
                 {
                     if (!queuePaths[i - 1].IsFull() && queuePaths[i].visitorsOnQueuePath.Contains(visitor)) // Sprawdzenie, czy wczeœniejsza kolejka nie jest pe³na i czy visitor nadal tu jest
                     {
                         queuePaths[i].visitorsOnQueuePath.Remove(visitor); // Usuniêcie z aktualnej kolejki
                         queuePaths[i - 1].visitorsOnQueuePath.Add(visitor); // Przeniesienie do poprzedniej kolejki
-                        visitor.MoveNPC(visitor.GetCurrentGridPosition(), queuePaths[i - 1].coordinates[0]); // Przemieszczenie Visitora
+/*                        visitor.MoveNPC(visitor.GetCurrentGridPosition(), queuePaths[i - 1].coordinates[0]); // Przemieszczenie Visitora*/
                         movedVisitor = true; // Flaga informuj¹ca, ¿e Visitor siê przesun¹³
                     }
                 }
             }
         }
         while (movedVisitor); // Kontynuuj dopóki ktoœ siê przesuwa
+    }
+
+    public void RemoveVisitor(Visitor visitor)
+    {
+        foreach (QueuePath path in queuePaths)
+        {
+            if (path.visitorsOnQueuePath.Contains(visitor))
+            {
+                path.visitorsOnQueuePath.Remove(visitor);
+                visitorsInQueue--;
+                break;
+            }
+        }
     }
     public void PerformMaintenance()
     {
@@ -182,10 +218,33 @@ public class Attraction : Structure
             spriteRenderer.color = Color.white;
         }
         failureChance = 0;
-            isOpen = true;
+        isOpen = true;
         isBroken = false;
-            Debug.Log($"{gameObject.name} przesz³o konserwacjê i jest ponownie otwarte!");
-        
-    
+        Debug.Log($"{gameObject.name} przesz³o konserwacjê i jest ponownie otwarte!");
+        satisfaction = Mathf.Min(satisfaction + 20, maxSatisfaction);
+
+    }
+
+    public void ReduceSatisfaction(int amount)
+    {
+        satisfaction = Mathf.Max(satisfaction - amount, 0);
+    }
+
+    public float GetSatisfactionScore()
+    {
+        // Oblicz koñcowy wynik satysfakcji uwzglêdniaj¹cy ró¿ne czynniki
+        float score = satisfaction;
+
+        // Modyfikatory:
+        if (isBroken) score *= 0.1f;           // Zmniejsz satysfakcjê jeœli atrakcja jest zepsuta
+        score *= 1f - (failureChance / 100f);    // Uwzglêdnij ryzyko awarii
+        score *= 1f - (ticketCost / 100f);       // Uwzglêdnij cenê biletu
+
+        return Mathf.Clamp(score, 0f, maxSatisfaction);
+    }
+
+    public void AddSatisfaction(int amount)
+    {
+        satisfaction = Mathf.Min(satisfaction + amount, maxSatisfaction);
     }
 }

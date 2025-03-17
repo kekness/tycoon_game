@@ -44,5 +44,35 @@ public class PathManager : BaseManager<PathManager>
         return false;
     }
 
-   
+
+    public Vector2Int GiveMeOne()
+    {
+        List<Vector2Int> validPoints = new List<Vector2Int>();
+
+        // PrzejdŸ przez ca³¹ siatkê i zbierz punkty z wartoœci¹ true
+        for (int x = 0; x < GridManager.instance.gridWidth - 1; x++)
+        {
+            for (int y = 0; y < GridManager.instance.gridHeight - 1; y++)
+            {
+                // Za³ó¿my, ¿e dostêp do siatki odbywa siê przez GridManager.instance.grid
+                if (gridPath[x, y])
+                {
+                    validPoints.Add(new Vector2Int(x, y));
+                }
+            }
+        }
+
+        // SprawdŸ, czy znaleziono jakiekolwiek punkty
+        if (validPoints.Count == 0)
+        {
+            // Mo¿esz rzuciæ wyj¹tkiem lub zwróciæ domyœln¹ wartoœæ
+            throw new System.InvalidOperationException("Brak punktów true w siatce.");
+        }
+
+        // Wylosuj i zwróæ losowy punkt
+        int randomIndex = UnityEngine.Random.Range(0, validPoints.Count);
+
+        Vector2Int result = validPoints[randomIndex];
+        return result;
+    }
 }

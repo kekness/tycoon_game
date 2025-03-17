@@ -6,7 +6,7 @@ public class GridManager : BaseManager<GridManager>
 {
     public Tilemap tilemap; // Odniesienie do Tilemap
     private bool[,] gridOccupancy;
-    private Dictionary<Vector2Int, Structure> structures; // S³ownik przechowuj¹cy struktury na siatce
+    public Dictionary<Vector2Int, Structure> structures; // S³ownik przechowuj¹cy struktury na siatce
 
     public int gridWidth = 50;
     public int gridHeight = 50;
